@@ -12,6 +12,7 @@ import Error "mo:base/Error";
 import libsecp256k1 "mo:libsecp256k1";
 import SHA3 "mo:sha3";
 import TU "./TextUtils";
+import AU "./ArrayUtils";
 
 module {
     public func getAddressFromPublicKey(
@@ -26,7 +27,7 @@ module {
                 return #err("Invalid public key");
             };
             case (#ok(p)) {
-                let keccak256_hex = nat8ArrayToHexText(calcKeccak(_arrayRight(p.serialize(), 1), 256));
+                let keccak256_hex = nat8ArrayToHexText(calcKeccak(AU.right(p.serialize(), 1), 256));
                 let address: Text = "0x" # TU.right(keccak256_hex, 24);
 
                 return #ok(address);
@@ -52,22 +53,6 @@ module {
         let amount_64 = TU.fill(amount_hex, '0', 64);
 
         return #ok(method_id # address_64 # amount_64);
-    };
-
-    func _arrayRight<T>(
-        arr: [T],
-        offset: Nat
-    ): [T] {
-        let elms = Nat.sub(arr.size(), offset);
-        let res = Buffer.Buffer<T>(elms);
-
-        var i = 0;
-        while(i < elms) {
-            res.add(arr[offset + i]);
-            i += 1;
-        };
-
-        return Buffer.toArray(res);
     };
 
     public func calcKeccak(
