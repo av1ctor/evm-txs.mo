@@ -72,14 +72,36 @@ S.run(nat8ArrayToHexText);
 //
 // getAddressFromPublicKey
 //
-let expected = "0x907dc4d0be5d691970cae886fcab34ed65a2cd66";
-let public_key_str = "02c397f23149d3464517d57b7cdc8e287428407f9beabfac731e7c24d536266cd1";
-
 let getAddressFromPublicKey = S.suite("getAddressFromPublicKey", [
-    S.test("valid",
-      Utils.getAddressFromPublicKey(Utils.hexTextToNat8Array(public_key_str)),
-      M.equals(T.result<Text, Text>(T.text(""), T.text(""), #ok(expected)))
+    S.test("is valid",
+      Utils.getAddressFromPublicKey(Utils.hexTextToNat8Array("02c397f23149d3464517d57b7cdc8e287428407f9beabfac731e7c24d536266cd1")),
+      M.equals(T.result<Text, Text>(T.text(""), T.text(""), #ok("0x907dc4d0be5d691970cae886fcab34ed65a2cd66")))
+    ),
+    S.test("is invalid (all zeros)",
+      Utils.getAddressFromPublicKey(Utils.hexTextToNat8Array("000000000000000000000000000000000000000000000000000000000000000000")),
+      M.equals(T.result<Text, Text>(T.text(""), T.text(""), #err("Invalid public key")))
+    ),
+    S.test("is invalid (empty)",
+      Utils.getAddressFromPublicKey(Utils.hexTextToNat8Array("")),
+      M.equals(T.result<Text, Text>(T.text(""), T.text(""), #err("Invalid length of public key")))
     ),
 ]);
 
 S.run(getAddressFromPublicKey);
+
+
+//
+// getTransferData
+//
+let getTransferData = S.suite("getTransferData", [
+    S.test("is valid",
+      Utils.getTransferData("0x907dc4d0be5d691970cae886fcab34ed65a2cd66", 1),
+      M.equals(T.result<Text, Text>(T.text(""), T.text(""), #ok("a9059cbb000000000000000000000000907dc4d0be5d691970cae886fcab34ed65a2cd660000000000000000000000000000000000000000000000000000000000000001")))
+    ),
+    S.test("is invalid",
+      Utils.getTransferData("0x00", 1),
+      M.equals(T.result<Text, Text>(T.text(""), T.text(""), #err("Invalid address")))
+    ),
+]);
+
+S.run(getTransferData);

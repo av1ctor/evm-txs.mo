@@ -1,4 +1,5 @@
 import Buffer "mo:base/Buffer";
+import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Text "mo:base/Text";
@@ -10,7 +11,7 @@ import Result "mo:base/Result";
 import Error "mo:base/Error";
 import libsecp256k1 "mo:libsecp256k1";
 import SHA3 "mo:sha3";
-import Nat "mo:base/Nat";
+import TU "./TextUtils";
 
 module {
     public func getAddressFromPublicKey(
@@ -26,18 +27,38 @@ module {
             };
             case (#ok(p)) {
                 let keccak256_hex = nat8ArrayToHexText(calcKeccak(_arrayRight(p.serialize(), 1), 256));
-                let address: Text = "0x" # _textRight(keccak256_hex, 24);
+                let address: Text = "0x" # TU.right(keccak256_hex, 24);
 
                 return #ok(address);
             };
         };
     };
 
+    public func getTransferData(
+        address: Text, 
+        amount: Nat64
+    ): Result.Result<Text, Text> {
+        if(address.size() != 42) {
+            return #err("Invalid address");
+        };
+        
+        let method_sig = "transfer(address,uint256)";
+        let keccak256_hex = nat8ArrayToHexText(calcKeccak(TU.encodeUtf8(method_sig), 256));
+        let method_id = TU.left(keccak256_hex, 7);
+
+        let address_64 = TU.fill(TU.right(address, 2), '0', 64);
+
+        let amount_hex = nat8ArrayToHexText(nat64ToNat8Array(amount));
+        let amount_64 = TU.fill(amount_hex, '0', 64);
+
+        return #ok(method_id # address_64 # amount_64);
+    };
+
     func _arrayRight<T>(
         arr: [T],
         offset: Nat
     ): [T] {
-        let elms = arr.size() - offset;
+        let elms = Nat.sub(arr.size(), offset);
         let res = Buffer.Buffer<T>(elms);
 
         var i = 0;
@@ -47,40 +68,6 @@ module {
         };
 
         return Buffer.toArray(res);
-    };
-
-    func _textSubstring(
-        arr: [Char], 
-        start: Nat, 
-        end: Nat
-    ): [Char] {
-        if(start <= end) {
-            Array.tabulate(end - start + 1, func (i: Nat): Char = arr[start+i]);
-        }
-        else {
-            [];
-        };
-    };
-
-    func _textRight(
-        text: Text,
-        offset: Nat
-    ): Text {
-        let arr = _textToCharArray(text);
-        let chars = _textSubstring(arr, offset, arr.size() - 1);
-        return _charArrayToText(chars);
-    };
-
-    func _textToCharArray(
-        text: Text
-    ): [Char] {
-        Iter.toArray(Text.toIter(text));
-    };
-
-    func _charArrayToText(
-        text: [Char] 
-    ): Text {
-        Text.fromIter(text.vals());
     };
 
     public func calcKeccak(
@@ -112,36 +99,6 @@ module {
         return Buffer.toArray(res);
     };
 
-    let ZERO_CHAR = 48: Nat32;
-    let A_UC_CHAR=  65: Nat32;
-    let A_LC_CHAR = 97: Nat32;
-
-    func _hexCharToNat32(
-        char: Char
-    ): Nat32 {
-        let c = Char.toNat32(char);
-        if(c >= A_LC_CHAR) {
-            return c -% A_LC_CHAR +% 10;
-        }
-        else if(c >= A_UC_CHAR) {
-            return c -% A_UC_CHAR +% 10;
-        }
-        else {
-            return c -% ZERO_CHAR;
-        };
-    };
-
-    func _nat32ToHexChar(
-        val: Nat32
-    ): Char {
-        if(val < 10) {
-            return Char.fromNat32(ZERO_CHAR + val);
-        }
-        else {
-            return Char.fromNat32(A_LC_CHAR + (val - 10));
-        };
-    };
-
     public func hexTextToNat8Array(
         value: Text
     ): [Nat8] {
@@ -155,8 +112,8 @@ module {
 
         var i = toSkip;
         while(i < str.size()) {
-            let ms = _hexCharToNat32(str[i]);
-            let ls = _hexCharToNat32(str[i+1]);
+            let ms = TU.hexCharToNat32(str[i]);
+            let ls = TU.hexCharToNat32(str[i+1]);
             res.add(Nat8.fromNat(Nat32.toNat((ms << 4) | ls)));
             i += 2;
         };
@@ -185,8 +142,8 @@ module {
             let b = Nat32.fromNat(Nat8.toNat(byte));
             let ms = (b & 0xf0) >> 4;
             let ls = b & 0x0f;
-            res #= Char.toText(_nat32ToHexChar(ms));
-            res #= Char.toText(_nat32ToHexChar(ls));
+            res #= Char.toText(TU.nat32ToHexChar(ms));
+            res #= Char.toText(TU.nat32ToHexChar(ls));
         };
 
         return res;
