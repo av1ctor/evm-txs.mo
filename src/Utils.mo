@@ -9,7 +9,7 @@ import Char "mo:base/Char";
 import Nat32 "mo:base/Nat32";
 import Result "mo:base/Result";
 import Error "mo:base/Error";
-import libsecp256k1 "mo:libsecp256k1";
+import PublicKey "mo:libsecp256k1/PublicKey";
 import SHA3 "mo:sha3";
 import TU "./TextUtils";
 import AU "./ArrayUtils";
@@ -22,7 +22,7 @@ module {
             return #err("Invalid length of public key");
         };
 
-        let p = switch(libsecp256k1.parse_compressed(pub_key_arr)) {
+        let p = switch(PublicKey.parse_compressed(pub_key_arr)) {
             case (#err(e)) {
                 return #err("Invalid public key");
             };
