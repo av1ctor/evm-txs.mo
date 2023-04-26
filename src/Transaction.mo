@@ -5,7 +5,6 @@ import Recover "mo:libsecp256k1/Recover";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
-import Debug "mo:base/Debug";
 
 module {
     public type Context = Recover.Context;
