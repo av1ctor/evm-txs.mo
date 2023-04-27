@@ -66,6 +66,32 @@ module {
         return #err("Not found");
     };
 
+    public func encodeAccessList(
+        accessList: [(Text, [Text])]
+    ): [Nat8] {
+        let stream = Buffer.Buffer<RlpTypes.Input>(accessList.size());
+
+        for(list in accessList.vals()) {
+            let address = #Uint8Array(Buffer.fromArray<Nat8>(Utils.hexTextToNat8Array(list.0)));
+
+            let storageKeys = Buffer.Buffer<RlpTypes.Input>(list.1.size());
+            for(key in list.1.vals()) {
+                storageKeys.add(#Uint8Array(Buffer.fromArray(Utils.hexTextToNat8Array(key))));
+            };
+
+            stream.add(#List(Buffer.fromArray<RlpTypes.Input>([address, #List(storageKeys)])));
+        };
+
+        switch(Rlp.encode(#List(stream))) {
+            case (#ok(res)) {
+                return Buffer.toArray(res);
+            };
+            case (#err(_)) {
+                return []
+            };
+        };
+    };
+
     public func decodeAccessList(
         accessList: [Nat8]
     ): [(Text, [Text])] {
