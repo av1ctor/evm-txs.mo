@@ -1,12 +1,12 @@
 DEP_DIR := ../src
 SRC_DIR := ./src
 OBJ_DIR := ./obj
-DEP_FILES := $(wildcard $(DEP_DIR)/*.mo)
+DEP_FILES := $(wildcard $(DEP_DIR)/*.mo) $(wildcard $(DEP_DIR)/transactions/*.mo)
 SRC_FILES := $(wildcard $(SRC_DIR)/*.mo)
 WASM_FILES := $(patsubst $(SRC_DIR)/%.mo,$(OBJ_DIR)/%.wasm,$(SRC_FILES))
 
 default: $(WASM_FILES)
-	wasmtime $<
+	for i in $(WASM_FILES); do wasmtime "$$i"; done
 
 clean:
 	rm -f $(WASM_FILES)

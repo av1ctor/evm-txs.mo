@@ -6,10 +6,10 @@ import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
 import Buffer "mo:base/Buffer";
+import Array "mo:base/Array";
 import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
-import Utils "Utils";
-import Array "mo:base/Array";
+import Utils "../Utils";
 
 module {
     public type Context = Recover.Context;
