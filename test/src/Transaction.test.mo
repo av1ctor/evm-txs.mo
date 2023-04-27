@@ -50,3 +50,29 @@ let getRecoveryId = S.suite("getRecoveryId", [
 
 S.run(getRecoveryId);
 
+//
+// decodeAccessList
+//
+let decodeAccessList = S.suite("decodeAccessList", [
+    S.test("decode valid",
+      do {
+        let access_list = "f872f85994de0b295669a9fd93d5f28d9ec85e40f4cb697baef842a00000000000000000000000000000000000000000000000000000000000000003a00000000000000000000000000000000000000000000000000000000000000007d694bb9bc244d798123fde783fcc1c72d3bb8c189413c0";
+        Transaction.decodeAccessList(Utils.hexTextToNat8Array(access_list))
+      },
+      M.equals(T.array<(Text, [Text])>(T.tuple2<Text, [Text]>(T.text(""), T.array<Text>(T.text(""), []), ("", [])), [
+        (
+          "de0b295669a9fd93d5f28d9ec85e40f4cb697bae",
+          [
+            "0000000000000000000000000000000000000000000000000000000000000003",
+            "0000000000000000000000000000000000000000000000000000000000000007",
+          ],
+        ),
+        (
+          "bb9bc244d798123fde783fcc1c72d3bb8c189413",
+          [],
+        ),
+      ]))
+    ),
+]);
+
+S.run(decodeAccessList);

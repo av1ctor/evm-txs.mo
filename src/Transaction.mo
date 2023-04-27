@@ -5,6 +5,11 @@ import Recover "mo:libsecp256k1/Recover";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
+import Buffer "mo:base/Buffer";
+import Rlp "mo:rlp";
+import RlpTypes "mo:rlp/types";
+import Utils "Utils";
+import Array "mo:base/Array";
 
 module {
     public type Context = Recover.Context;
@@ -61,4 +66,41 @@ module {
         return #err("Not found");
     };
 
-};
+    public func decodeAccessList(
+        accessList: [Nat8]
+    ): [(Text, [Text])] {
+        let res = Buffer.Buffer<(Text, [Text])>(10);
+        
+        switch(Rlp.decode(#Uint8Array(Buffer.fromArray(accessList)))) {
+            case (#err(msg)) {
+                return [];
+            };
+            case (#ok(dec)) {
+                switch(dec) {
+                    case (#Uint8Array(_)) {
+                        return [];
+                    };
+                    case (#Nested(buf)) {
+                        for(item in buf.vals()) {
+                            switch(item) {
+                                case (#Uint8Array(_)) {
+                                    return [];
+                                };
+                                case (#Nested(buf)) {
+                                    let address = Utils.rlpGetAsValue(buf.get(0));
+                                    let storageKeys = Utils.rlpGetAsList(buf.get(1));
+                                    res.add((
+                                        Utils.nat8ArrayToHexText(address), 
+                                        Array.map<[Nat8], Text>(storageKeys, func k = Utils.nat8ArrayToHexText(k))
+                                    ));
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        
+        return Buffer.toArray(res);
+    };
+}

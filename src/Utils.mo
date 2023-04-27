@@ -11,6 +11,7 @@ import Result "mo:base/Result";
 import Error "mo:base/Error";
 import PublicKey "mo:libsecp256k1/PublicKey";
 import SHA3 "mo:sha3";
+import RlpTypes "mo:rlp/types";
 import TU "./TextUtils";
 import AU "./ArrayUtils";
 
@@ -132,5 +133,41 @@ module {
         };
 
         return res;
+    };
+
+    public func rlpGetAsValue(
+        dec: RlpTypes.Decoded
+    ): [Nat8] {
+        switch(dec) {
+            case (#Uint8Array(val)) {
+                return Buffer.toArray(val);
+            };
+            case (#Nested(_)) {
+                return [];
+            };
+        };
+    };
+
+    public func rlpGetAsList(
+        dec: RlpTypes.Decoded
+    ): [[Nat8]] {
+        switch(dec) {
+            case (#Uint8Array(_)) {
+                return [];
+            };
+            case (#Nested(list)) {
+                let res = Buffer.Buffer<[Nat8]>(list.size());
+                for(item in list.vals()) {
+                    switch(item) {
+                        case (#Uint8Array(val)) {
+                            res.add(Buffer.toArray(val));
+                        };
+                        case (#Nested(_)) {
+                        };
+                    };
+                };
+                return Buffer.toArray(res);
+            };
+        };
     };
 };
