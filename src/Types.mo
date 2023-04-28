@@ -1,14 +1,13 @@
 module {
     public type TransactionType = {
-        #Legacy;
-        #EIP1559;
-        #EIP2930;
+        #Legacy: ?TransactionLegacy;
+        #EIP1559: ?Transaction1559;
+        #EIP2930: ?Transaction2930;
     };
 
-    public type TransactionLegacy = {
+    public type TransactionBase = {
         chainId: Nat64;
         nonce: Nat64;
-        gasPrice: Nat64;
         gasLimit: Nat64;
         to: Text;
         value: Nat64;
@@ -17,33 +16,19 @@ module {
         r: Text;
         s: Text;
     };
-
-    public type Transaction2930 = {
-        chainId: Nat64;
-        nonce: Nat64;
+    
+    public type TransactionLegacy = TransactionBase and {
         gasPrice: Nat64;
-        gasLimit: Nat64;
-        to: Text;
-        value: Nat64;
-        data: Text;
+    };
+
+    public type Transaction2930 = TransactionBase and {
+        gasPrice: Nat64;
         accessList: [(Text, [Text])];
-        v: Text;
-        r: Text;
-        s: Text;
     };
 
-    public type Transaction1559 = {
-        chainId: Nat64;
-        nonce: Nat64;
+    public type Transaction1559 = TransactionBase and {
         maxPriorityFeePerGas: Nat64;
         maxFeePerGas: Nat64;
-        gasLimit: Nat64;
-        to: Text;
-        value: Nat64;
-        data: Text;
         accessList: [(Text, [Text])];
-        v: Text;
-        r: Text;
-        s: Text;
     };
 }

@@ -16,10 +16,10 @@ import Helper "Helper";
 module Legacy {
     public func from(
         data: ([Nat8], Nat64)
-    ): ?Types.TransactionLegacy {
+    ): Result.Result<Types.TransactionLegacy, Text> {
         switch(Rlp.decode(#Uint8Array(Buffer.fromArray(data.0)))) {
-            case (#err(_)) {
-                return null;
+            case (#err(msg)) {
+                return #err(msg);
             };
             case (#ok(dec)) {
                 switch(dec) {
@@ -36,7 +36,7 @@ module Legacy {
 
                         let chainId = data.1;
 
-                        return ?{
+                        return #ok({
                             chainId = chainId;
                             nonce = nonce;
                             gasPrice = gasPrice;
@@ -47,10 +47,10 @@ module Legacy {
                             v = v;
                             r = r;
                             s = s;
-                        };
+                        });
                     };
                     case _ {
-                        return null;
+                        return #err("Invalid raw transaction");
                     };
                 };
             };
@@ -135,13 +135,20 @@ module Legacy {
         signature: [Nat8],
         publicKey: [Nat8],
         ctx: Recover.Context,
-    ): Result.Result<[Nat8], Text> {
+    ): Result.Result<(Types.TransactionLegacy, [Nat8]), Text> {
         switch(sign(tx, signature, publicKey, ctx)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(signedTx)) {
-                return serialize(signedTx);
+                switch(serialize(signedTx)) {
+                    case (#err(msg)) {
+                        return #err(msg);
+                    };
+                    case (#ok(serTx)) {
+                        return #ok((signedTx, serTx));
+                    };
+                };
             };
         };
     };

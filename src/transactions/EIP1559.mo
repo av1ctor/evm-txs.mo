@@ -16,10 +16,10 @@ import Helper "Helper";
 module EIP1559 {
     public func from(
         data: [Nat8]
-    ): ?Types.Transaction1559 {
+    ): Result.Result<Types.Transaction1559, Text> {
         switch(Rlp.decode(#Uint8Array(Buffer.fromArray(ArrayUtils.right(data, 1))))) {
-            case (#err(_)) {
-                return null;
+            case (#err(msg)) {
+                return #err(msg);
             };
             case (#ok(dec)) {
                 switch(dec) {
@@ -37,7 +37,7 @@ module EIP1559 {
                         let r = Utils.rlpGetAsText(list.get(10));
                         let s = Utils.rlpGetAsText(list.get(11));
 
-                        return ?{
+                        return #ok({
                             chainId = chainId;
                             nonce = nonce;
                             maxPriorityFeePerGas = maxPriorityFeePerGas;
@@ -50,10 +50,10 @@ module EIP1559 {
                             v = v;
                             r = r;
                             s = s;
-                        };
+                        });
                     };
                     case _ {
-                        return null;
+                        return #err("Invalid raw transaction");
                     };
                 };
             };
@@ -139,13 +139,20 @@ module EIP1559 {
         signature: [Nat8],
         publicKey: [Nat8],
         ctx: Recover.Context,
-    ): Result.Result<[Nat8], Text> {
+    ): Result.Result<(Types.Transaction1559, [Nat8]), Text> {
         switch(sign(tx, signature, publicKey, ctx)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(signedTx)) {
-                return serialize(signedTx);
+                switch(serialize(signedTx)) {
+                    case (#err(msg)) {
+                        return #err(msg);
+                    };
+                    case (#ok(serTx)) {
+                        return #ok((signedTx, serTx));
+                    };
+                };
             };
         };
     };

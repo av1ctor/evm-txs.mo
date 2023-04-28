@@ -17,13 +17,13 @@ import AU "./ArrayUtils";
 
 module {
     public func getAddressFromPublicKey(
-        pub_key_arr: [Nat8]
+        publicKey: [Nat8]
     ): Result.Result<Text, Text> {
-        if(pub_key_arr.size() != 33) {
+        if(publicKey.size() != 33) {
             return #err("Invalid length of public key");
         };
 
-        let p = switch(PublicKey.parse_compressed(pub_key_arr)) {
+        let p = switch(PublicKey.parse_compressed(publicKey)) {
             case (#err(e)) {
                 return #err("Invalid public key");
             };
