@@ -53,7 +53,8 @@ module {
 
             let message_bytes_32 = Message.parse(message);
 
-            switch(Recover.recover_with_context(message_bytes_32, signature_bytes_64, recovery_id, context)) {
+            switch(Recover.recover_with_context(
+                message_bytes_32, signature_bytes_64, recovery_id, context)) {
                 case (#ok(key)) {
                     if(key.serialize_compressed() == public_key) {
                         return #ok(Nat8.fromNat(i));

@@ -161,4 +161,41 @@ module {
             };
         };
     };
+
+    public func serialize(
+        tx: Types.TransactionType
+    ): Result.Result<[Nat8], Text> {
+        switch(tx) {
+            case (#Legacy(tx)) {
+                switch(tx) {
+                    case null {
+                        return #err("Null transaction");
+                    };
+                    case (?tx) {
+                        return Legacy.serialize(tx);
+                    };
+                };
+            };
+            case (#EIP2930(tx)) {
+                switch(tx) {
+                    case null {
+                        return #err("Null transaction");
+                    };
+                    case (?tx) {
+                        return Eip2930.serialize(tx);
+                    };
+                };
+            };
+            case (#EIP1559(tx)) {
+                switch(tx) {
+                    case null {
+                        return #err("Null transaction");
+                    };
+                    case (?tx) {
+                        return Eip1559.serialize(tx);
+                    };
+                };
+            };
+        };
+    };
 };

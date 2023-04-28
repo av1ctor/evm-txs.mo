@@ -103,8 +103,10 @@ module EIP1559 {
     ): Result.Result<Types.Transaction1559, Text> {
         let chain_id = tx.chainId;
 
-        let r_remove_leading_zeros = ArrayUtils.stripLeft(ArrayUtils.left(signature, 31), func(e: Nat8): Bool = e == 0);
-        let s_remove_leading_zeros = ArrayUtils.stripLeft(ArrayUtils.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
+        let r_remove_leading_zeros = ArrayUtils.stripLeft(
+            ArrayUtils.left(signature, 31), func(e: Nat8): Bool = e == 0);
+        let s_remove_leading_zeros = ArrayUtils.stripLeft(
+            ArrayUtils.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
 
         let r = Utils.arrayToText(r_remove_leading_zeros);
         let s = Utils.arrayToText(s_remove_leading_zeros);

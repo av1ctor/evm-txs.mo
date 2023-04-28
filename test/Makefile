@@ -1,7 +1,7 @@
 DEP_DIR := ../src
 SRC_DIR := ./src
 OBJ_DIR := ./obj
-DEP_FILES := $(wildcard $(DEP_DIR)/*.mo) $(wildcard $(DEP_DIR)/transactions/*.mo)
+DEP_FILES := $(wildcard $(DEP_DIR)/*.mo) $(wildcard $(DEP_DIR)/transactions/*.mo) $(wildcard $(DEP_DIR)/utils/*.mo)
 SRC_FILES := $(wildcard $(SRC_DIR)/*.mo)
 WASM_FILES := $(patsubst $(SRC_DIR)/%.mo,$(OBJ_DIR)/%.wasm,$(SRC_FILES))
 
