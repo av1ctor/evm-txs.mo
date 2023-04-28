@@ -8,9 +8,9 @@ import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
 import Recover "mo:libsecp256k1/Recover";
 import Types "../Types";
-import Utils "../Utils";
-import ArrayUtils "../ArrayUtils";
-import TextUtils "../TextUtils";
+import Utils "../utils/Utils";
+import ArrayUtils "../utils/ArrayUtils";
+import TextUtils "../utils/TextUtils";
 import Helper "Helper";
 
 module EIP1559 {

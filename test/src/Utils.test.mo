@@ -1,7 +1,7 @@
 import M "mo:matchers/Matchers";
 import S "mo:matchers/Suite";
 import T "mo:matchers/Testable";
-import Utils "../../src/Utils";
+import Utils "../../src/utils/Utils";
 import Debug "mo:base/Debug";
 
 //

@@ -9,7 +9,7 @@ import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
-import Utils "../Utils";
+import Utils "../utils/Utils";
 
 module {
     public type Context = Recover.Context;

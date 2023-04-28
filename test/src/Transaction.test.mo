@@ -2,7 +2,7 @@ import M "mo:matchers/Matchers";
 import S "mo:matchers/Suite";
 import T "mo:matchers/Testable";
 import Helper "../../src/transactions/Helper";
-import Utils "../../src/Utils";
+import Utils "../../src/utils/Utils";
 
 let context = Helper.allocContext();
 
