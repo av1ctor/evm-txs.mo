@@ -65,14 +65,14 @@ module EIP1559 {
     ): Result.Result<[Nat8], Text> {
         
         let items: [[Nat8]] = [
-            Utils.nat64ToNat8Array(tx.chainId),
-            Utils.nat64ToNat8Array(tx.nonce),
-            Utils.nat64ToNat8Array(tx.maxPriorityFeePerGas),
-            Utils.nat64ToNat8Array(tx.maxFeePerGas),
-            Utils.nat64ToNat8Array(tx.gasLimit),
-            Utils.hexTextToNat8Array(tx.to),
-            Utils.nat64ToNat8Array(tx.value),
-            Utils.hexTextToNat8Array(tx.data),
+            Utils.nat64ToArray(tx.chainId),
+            Utils.nat64ToArray(tx.nonce),
+            Utils.nat64ToArray(tx.maxPriorityFeePerGas),
+            Utils.nat64ToArray(tx.maxFeePerGas),
+            Utils.nat64ToArray(tx.gasLimit),
+            Utils.textToArray(tx.to),
+            Utils.nat64ToArray(tx.value),
+            Utils.textToArray(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());
@@ -106,8 +106,8 @@ module EIP1559 {
         let r_remove_leading_zeros = ArrayUtils.stripLeft(ArrayUtils.left(signature, 31), func(e: Nat8): Bool = e == 0);
         let s_remove_leading_zeros = ArrayUtils.stripLeft(ArrayUtils.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
 
-        let r = Utils.nat8ArrayToHexText(r_remove_leading_zeros);
-        let s = Utils.nat8ArrayToHexText(s_remove_leading_zeros);
+        let r = Utils.arrayToText(r_remove_leading_zeros);
+        let s = Utils.arrayToText(s_remove_leading_zeros);
 
         switch(getMessageToSign(tx)) {
             case (#err(msg)) {
@@ -175,8 +175,8 @@ module EIP1559 {
             return #err("This is not a signed transaction");
         };
 
-        let r = Buffer.fromArray<Nat8>(Utils.hexTextToNat8Array(tx.r));
-        let s = Buffer.fromArray<Nat8>(Utils.hexTextToNat8Array(tx.s));
+        let r = Buffer.fromArray<Nat8>(Utils.textToArray(tx.r));
+        let s = Buffer.fromArray<Nat8>(Utils.textToArray(tx.s));
         let res = Buffer.Buffer<Nat8>(r.size() + s.size());
         res.append(r);
         res.append(s);
@@ -191,7 +191,7 @@ module EIP1559 {
             return #err("This is not a signed transaction");
         };
         
-        let v = Utils.hexTextToNat8Array(tx.v);
+        let v = Utils.textToArray(tx.v);
 
         return if(v.size() == 0) #ok(0) else #ok(1);
     };
@@ -200,18 +200,18 @@ module EIP1559 {
         tx: Types.Transaction1559
     ): Result.Result<[Nat8], Text> {
         let items: [[Nat8]] = [
-            Utils.nat64ToNat8Array(tx.chainId),
-            Utils.nat64ToNat8Array(tx.nonce),
-            Utils.nat64ToNat8Array(tx.maxPriorityFeePerGas),
-            Utils.nat64ToNat8Array(tx.maxFeePerGas),
-            Utils.nat64ToNat8Array(tx.gasLimit),
-            Utils.hexTextToNat8Array(tx.to),
-            Utils.nat64ToNat8Array(tx.value),
-            Utils.hexTextToNat8Array(tx.data),
+            Utils.nat64ToArray(tx.chainId),
+            Utils.nat64ToArray(tx.nonce),
+            Utils.nat64ToArray(tx.maxPriorityFeePerGas),
+            Utils.nat64ToArray(tx.maxFeePerGas),
+            Utils.nat64ToArray(tx.gasLimit),
+            Utils.textToArray(tx.to),
+            Utils.nat64ToArray(tx.value),
+            Utils.textToArray(tx.data),
             Helper.encodeAccessList(tx.accessList),
-            Utils.hexTextToNat8Array(tx.v),
-            Utils.hexTextToNat8Array(tx.r),
-            Utils.hexTextToNat8Array(tx.s),
+            Utils.textToArray(tx.v),
+            Utils.textToArray(tx.r),
+            Utils.textToArray(tx.s),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());

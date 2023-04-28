@@ -28,7 +28,7 @@ module {
                 return #err("Invalid public key");
             };
             case (#ok(p)) {
-                let keccak256_hex = nat8ArrayToHexText(calcKeccak(AU.right(p.serialize(), 1), 256));
+                let keccak256_hex = arrayToText(calcKeccak(AU.right(p.serialize(), 1), 256));
                 let address: Text = "0x" # TU.right(keccak256_hex, 24);
 
                 return #ok(address);
@@ -45,12 +45,12 @@ module {
         };
         
         let method_sig = "transfer(address,uint256)";
-        let keccak256_hex = nat8ArrayToHexText(calcKeccak(TU.encodeUtf8(method_sig), 256));
+        let keccak256_hex = arrayToText(calcKeccak(TU.encodeUtf8(method_sig), 256));
         let method_id = TU.left(keccak256_hex, 7);
 
         let address_64 = TU.fill(TU.right(address, 2), '0', 64);
 
-        let amount_hex = nat8ArrayToHexText(nat64ToNat8Array(amount));
+        let amount_hex = arrayToText(nat64ToArray(amount));
         let amount_64 = TU.fill(amount_hex, '0', 64);
 
         return #ok(method_id # address_64 # amount_64);
@@ -65,7 +65,7 @@ module {
         return hash.finalize();
     };
 
-    public func nat64ToNat8Array(
+    public func nat64ToArray(
         value: Nat64
     ): [Nat8] {
         let res = Buffer.Buffer<Nat8>(8);
@@ -85,7 +85,7 @@ module {
         return Buffer.toArray(res);
     };
 
-    public func hexTextToNat8Array(
+    public func textToArray(
         value: Text
     ): [Nat8] {
         let res = Buffer.Buffer<Nat8>(32);
@@ -107,7 +107,7 @@ module {
         return Buffer.toArray(res);
     };
 
-    public func nat8ArrayToNat64(
+    public func arrayToNat64(
         arr: [Nat8]
     ): Nat64 {
         var res: Nat64 = 0;
@@ -119,7 +119,7 @@ module {
         return res;
     };
 
-    public func nat8ArrayToHexText(
+    public func arrayToText(
         arr: [Nat8]
     ): Text {
         var res = "";
@@ -151,13 +151,13 @@ module {
     public func rlpGetAsNat64(
         dec: RlpTypes.Decoded
     ): Nat64 {
-        return nat8ArrayToNat64(rlpGetAsValue(dec));
+        return arrayToNat64(rlpGetAsValue(dec));
     };
 
     public func rlpGetAsText(
         dec: RlpTypes.Decoded
     ): Text {
-        return nat8ArrayToHexText(rlpGetAsValue(dec));
+        return arrayToText(rlpGetAsValue(dec));
     };
 
     public func rlpGetAsList(

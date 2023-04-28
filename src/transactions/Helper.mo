@@ -72,11 +72,11 @@ module {
         let stream = Buffer.Buffer<RlpTypes.Input>(accessList.size());
 
         for(list in accessList.vals()) {
-            let address = #Uint8Array(Buffer.fromArray<Nat8>(Utils.hexTextToNat8Array(list.0)));
+            let address = #Uint8Array(Buffer.fromArray<Nat8>(Utils.textToArray(list.0)));
 
             let storageKeys = Buffer.Buffer<RlpTypes.Input>(list.1.size());
             for(key in list.1.vals()) {
-                storageKeys.add(#Uint8Array(Buffer.fromArray(Utils.hexTextToNat8Array(key))));
+                storageKeys.add(#Uint8Array(Buffer.fromArray(Utils.textToArray(key))));
             };
 
             stream.add(#List(Buffer.fromArray<RlpTypes.Input>([address, #List(storageKeys)])));
@@ -117,8 +117,8 @@ module {
                             let address = Utils.rlpGetAsValue(buf.get(0));
                             let storageKeys = Utils.rlpGetAsList(buf.get(1));
                             res.add((
-                                Utils.nat8ArrayToHexText(address), 
-                                Array.map<[Nat8], Text>(storageKeys, func k = Utils.nat8ArrayToHexText(k))
+                                Utils.arrayToText(address), 
+                                Array.map<[Nat8], Text>(storageKeys, func k = Utils.arrayToText(k))
                             ));
                         };
                     };
