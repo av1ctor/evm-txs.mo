@@ -66,9 +66,9 @@ module {
         return #err("Not found");
     };
 
-    public func encodeAccessList(
+    public func deserializeAccessList(
         accessList: [(Text, [Text])]
-    ): [Nat8] {
+    ): RlpTypes.Input {
         let stream = Buffer.Buffer<RlpTypes.Input>(accessList.size());
 
         for(list in accessList.vals()) {
@@ -82,7 +82,13 @@ module {
             stream.add(#List(Buffer.fromArray<RlpTypes.Input>([address, #List(storageKeys)])));
         };
 
-        switch(Rlp.encode(#List(stream))) {
+        return #List(stream);
+    };
+
+    public func encodeAccessList(
+        accessList: [(Text, [Text])]
+    ): [Nat8] {
+        switch(Rlp.encode(deserializeAccessList(accessList))) {
             case (#ok(res)) {
                 return Buffer.toArray(res);
             };
@@ -92,41 +98,47 @@ module {
         };
     };
 
+    public func serializeAccessList(
+        accessList: RlpTypes.Decoded
+    ): [(Text, [Text])] {
+        switch(accessList) {
+            case (#Uint8Array(_)) {
+                return [];
+            };
+            case (#Nested(buf)) {
+                let res = Buffer.Buffer<(Text, [Text])>(10);
+
+                for(item in buf.vals()) {
+                    switch(item) {
+                        case (#Uint8Array(_)) {
+                            return [];
+                        };
+                        case (#Nested(buf)) {
+                            let address = Utils.rlpGetAsValue(buf.get(0));
+                            let storageKeys = Utils.rlpGetAsList(buf.get(1));
+                            res.add((
+                                Utils.nat8ArrayToHexText(address), 
+                                Array.map<[Nat8], Text>(storageKeys, func k = Utils.nat8ArrayToHexText(k))
+                            ));
+                        };
+                    };
+                };
+
+                return Buffer.toArray(res);
+            };
+        };
+    };
+
     public func decodeAccessList(
         accessList: [Nat8]
     ): [(Text, [Text])] {
-        let res = Buffer.Buffer<(Text, [Text])>(10);
-        
         switch(Rlp.decode(#Uint8Array(Buffer.fromArray(accessList)))) {
             case (#err(msg)) {
                 return [];
             };
             case (#ok(dec)) {
-                switch(dec) {
-                    case (#Uint8Array(_)) {
-                        return [];
-                    };
-                    case (#Nested(buf)) {
-                        for(item in buf.vals()) {
-                            switch(item) {
-                                case (#Uint8Array(_)) {
-                                    return [];
-                                };
-                                case (#Nested(buf)) {
-                                    let address = Utils.rlpGetAsValue(buf.get(0));
-                                    let storageKeys = Utils.rlpGetAsList(buf.get(1));
-                                    res.add((
-                                        Utils.nat8ArrayToHexText(address), 
-                                        Array.map<[Nat8], Text>(storageKeys, func k = Utils.nat8ArrayToHexText(k))
-                                    ));
-                                };
-                            };
-                        };
-                    };
-                };
+                return serializeAccessList(dec);
             };
         };
-        
-        return Buffer.toArray(res);
     };
 }

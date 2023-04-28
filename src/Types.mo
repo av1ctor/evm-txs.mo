@@ -17,4 +17,18 @@ module {
         r: Text;
         s: Text;
     };
+
+    public type Transaction2930 = {
+        chainId: Nat64;
+        nonce: Nat64;
+        gasPrice: Nat64;
+        gasLimit: Nat64;
+        to: Text;
+        value: Nat64;
+        data: Text;
+        accessList: [(Text, [Text])];
+        v: Text;
+        r: Text;
+        s: Text;
+    };
 }
