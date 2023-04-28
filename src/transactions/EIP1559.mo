@@ -13,10 +13,10 @@ import ArrayUtils "../ArrayUtils";
 import TextUtils "../TextUtils";
 import Helper "Helper";
 
-module EIP2930 {
+module EIP1559 {
     public func from(
         data: [Nat8]
-    ): ?Types.Transaction2930 {
+    ): ?Types.Transaction1559 {
         switch(Rlp.decode(#Uint8Array(Buffer.fromArray(ArrayUtils.right(data, 1))))) {
             case (#err(_)) {
                 return null;
@@ -26,20 +26,22 @@ module EIP2930 {
                     case (#Nested(list)) {
                         let chainId = Utils.rlpGetAsNat64(list.get(0));
                         let nonce = Utils.rlpGetAsNat64(list.get(1));
-                        let gasPrice = Utils.rlpGetAsNat64(list.get(2));
-                        let gasLimit = Utils.rlpGetAsNat64(list.get(3));
-                        let to = Utils.rlpGetAsText(list.get(4));
-                        let value = Utils.rlpGetAsNat64(list.get(5));
-                        let dataTx = Utils.rlpGetAsText(list.get(6));
-                        let accessList = Helper.serializeAccessList(list.get(7));
-                        let v = Utils.rlpGetAsText(list.get(8));
-                        let r = Utils.rlpGetAsText(list.get(9));
-                        let s = Utils.rlpGetAsText(list.get(10));
+                        let maxPriorityFeePerGas = Utils.rlpGetAsNat64(list.get(2));
+                        let maxFeePerGas = Utils.rlpGetAsNat64(list.get(3));
+                        let gasLimit = Utils.rlpGetAsNat64(list.get(4));
+                        let to = Utils.rlpGetAsText(list.get(5));
+                        let value = Utils.rlpGetAsNat64(list.get(6));
+                        let dataTx = Utils.rlpGetAsText(list.get(7));
+                        let accessList = Helper.serializeAccessList(list.get(8));
+                        let v = Utils.rlpGetAsText(list.get(9));
+                        let r = Utils.rlpGetAsText(list.get(10));
+                        let s = Utils.rlpGetAsText(list.get(11));
 
                         return ?{
                             chainId = chainId;
                             nonce = nonce;
-                            gasPrice = gasPrice;
+                            maxPriorityFeePerGas = maxPriorityFeePerGas;
+                            maxFeePerGas = maxFeePerGas;
                             gasLimit = gasLimit;
                             to = to;
                             value = value;
@@ -59,20 +61,21 @@ module EIP2930 {
     };
 
     public func getMessageToSign(
-        tx: Types.Transaction2930
+        tx: Types.Transaction1559
     ): Result.Result<[Nat8], Text> {
         
         let items: [[Nat8]] = [
             Utils.nat64ToNat8Array(tx.chainId),
             Utils.nat64ToNat8Array(tx.nonce),
-            Utils.nat64ToNat8Array(tx.gasPrice),
+            Utils.nat64ToNat8Array(tx.maxPriorityFeePerGas),
+            Utils.nat64ToNat8Array(tx.maxFeePerGas),
             Utils.nat64ToNat8Array(tx.gasLimit),
             Utils.hexTextToNat8Array(tx.to),
             Utils.nat64ToNat8Array(tx.value),
             Utils.hexTextToNat8Array(tx.data),
         ];
 
-        let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 1);
+        let buf = Buffer.Buffer<RlpTypes.Input>(items.size());
         for(item in items.vals()) {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
@@ -84,7 +87,7 @@ module EIP2930 {
                 return #err(msg);
             };
             case (#ok(enc)) {
-                let msg = Buffer.fromArray<Nat8>([0x01]);
+                let msg = Buffer.fromArray<Nat8>([0x02]);
                 msg.append(enc);
                 let hash = Utils.calcKeccak(Buffer.toArray(msg), 256);
                 return #ok(hash);
@@ -93,11 +96,11 @@ module EIP2930 {
     };
 
     public func sign(
-        tx: Types.Transaction2930,
+        tx: Types.Transaction1559,
         signature: [Nat8],
         publicKey: [Nat8],
         ctx: Recover.Context,
-    ): Result.Result<Types.Transaction2930, Text> {
+    ): Result.Result<Types.Transaction1559, Text> {
         let chain_id = tx.chainId;
 
         let r_remove_leading_zeros = ArrayUtils.stripLeft(ArrayUtils.left(signature, 31), func(e: Nat8): Bool = e == 0);
@@ -132,7 +135,7 @@ module EIP2930 {
     };
 
     public func signAndSerialize(
-        tx: Types.Transaction2930,
+        tx: Types.Transaction1559,
         signature: [Nat8],
         publicKey: [Nat8],
         ctx: Recover.Context,
@@ -148,7 +151,7 @@ module EIP2930 {
     };
 
     public func isSigned(
-        tx: Types.Transaction2930
+        tx: Types.Transaction1559
     ): Bool {
         let r = if(Text.startsWith(tx.r, #text("0x"))) {
             TextUtils.right(tx.r, 2);
@@ -166,7 +169,7 @@ module EIP2930 {
     };
 
     public func getSignature(
-        tx: Types.Transaction2930
+        tx: Types.Transaction1559
     ): Result.Result<[Nat8], Text> {
         if(not isSigned(tx)) {
             return #err("This is not a signed transaction");
@@ -182,7 +185,7 @@ module EIP2930 {
     };
 
     public func getRecoveryId(
-        tx: Types.Transaction2930
+        tx: Types.Transaction1559
     ): Result.Result<Nat8, Text> {
         if(not isSigned(tx)) {
             return #err("This is not a signed transaction");
@@ -194,13 +197,13 @@ module EIP2930 {
     };
 
     public func serialize(
-        tx: Types.Transaction2930
+        tx: Types.Transaction1559
     ): Result.Result<[Nat8], Text> {
-
         let items: [[Nat8]] = [
             Utils.nat64ToNat8Array(tx.chainId),
             Utils.nat64ToNat8Array(tx.nonce),
-            Utils.nat64ToNat8Array(tx.gasPrice),
+            Utils.nat64ToNat8Array(tx.maxPriorityFeePerGas),
+            Utils.nat64ToNat8Array(tx.maxFeePerGas),
             Utils.nat64ToNat8Array(tx.gasLimit),
             Utils.hexTextToNat8Array(tx.to),
             Utils.nat64ToNat8Array(tx.value),
@@ -221,7 +224,7 @@ module EIP2930 {
                 return #err(msg);
             };
             case (#ok(enc)) {
-                let msg = Buffer.fromArray<Nat8>([0x01]);
+                let msg = Buffer.fromArray<Nat8>([0x02]);
                 msg.append(enc);
                 return #ok(Buffer.toArray<Nat8>(msg));
             };

@@ -148,6 +148,18 @@ module {
         };
     };
 
+    public func rlpGetAsNat64(
+        dec: RlpTypes.Decoded
+    ): Nat64 {
+        return nat8ArrayToNat64(rlpGetAsValue(dec));
+    };
+
+    public func rlpGetAsText(
+        dec: RlpTypes.Decoded
+    ): Text {
+        return nat8ArrayToHexText(rlpGetAsValue(dec));
+    };
+
     public func rlpGetAsList(
         dec: RlpTypes.Decoded
     ): [[Nat8]] {

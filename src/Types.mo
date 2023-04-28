@@ -31,4 +31,19 @@ module {
         r: Text;
         s: Text;
     };
+
+    public type Transaction1559 = {
+        chainId: Nat64;
+        nonce: Nat64;
+        maxPriorityFeePerGas: Nat64;
+        maxFeePerGas: Nat64;
+        gasLimit: Nat64;
+        to: Text;
+        value: Nat64;
+        data: Text;
+        accessList: [(Text, [Text])];
+        v: Text;
+        r: Text;
+        s: Text;
+    };
 }
