@@ -2,11 +2,12 @@ import Blob "mo:base/Blob";
 import Error "mo:base/Error";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
+import Recover "mo:libsecp256k1/Recover";
+import Ecmult "mo:libsecp256k1/core/ecmult";
 import Types "Types";
 import Eip2930 "transactions/EIP2930";
 import Legacy "transactions/Legacy";
 import Eip1559 "transactions/EIP1559";
-import Helper "transactions/Helper";
 import EcdsaApi "interfaces/EcdsaApi";
 
 module {
@@ -109,7 +110,7 @@ module {
         tx: Types.TransactionType,
         signature: [Nat8],
         publicKey: [Nat8],
-        ctx: Helper.Context
+        ctx: Ecmult.ECMultContext
     ): Result.Result<(Types.TransactionType, [Nat8]), Text> {
         switch(tx) {
             case (#Legacy(tx)) {
@@ -172,7 +173,7 @@ module {
         keyName: Text,
         principal: Principal,
         publicKey: [Nat8],
-        ctx: Helper.Context,
+        ctx: Ecmult.ECMultContext,
         api: EcdsaApi.API
     ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
         let caller = Principal.toBlob(principal);

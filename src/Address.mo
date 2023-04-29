@@ -7,6 +7,7 @@ import Signature "mo:libsecp256k1/Signature";
 import Message "mo:libsecp256k1/Message";
 import RecoveryId "mo:libsecp256k1/RecoveryId";
 import Recover "mo:libsecp256k1/Recover";
+import Ecmult "mo:libsecp256k1/core/ecmult";
 import Helper "transactions/Helper";
 import TU "utils/TextUtils";
 import AU "utils/ArrayUtils";
@@ -54,7 +55,7 @@ module {
         signature: [Nat8],
         recoveryId: Nat8,
         message: [Nat8],
-        context: Helper.Context
+        context: Ecmult.ECMultContext
     ): Result.Result<Text, Text> {
         if(signature.size() != 64) {
             return #err("Invalid signature");

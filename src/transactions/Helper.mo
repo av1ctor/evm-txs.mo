@@ -2,6 +2,7 @@ import RecoveryId "mo:libsecp256k1/RecoveryId";
 import Signature "mo:libsecp256k1/Signature";
 import Message "mo:libsecp256k1/Message";
 import Recover "mo:libsecp256k1/Recover";
+import Ecmult "mo:libsecp256k1/core/ecmult";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
@@ -14,15 +15,11 @@ import AU "../utils/ArrayUtils";
 import RlpUtils "../utils/RlpUtils";
 
 module {
-    public type Context = Recover.Context;
-
-    public let allocContext = Recover.alloc_context;
-
     public func getRecoveryId(
         message: [Nat8],
         signature: [Nat8],
         publicKey: [Nat8],
-        context: Context,
+        context: Ecmult.ECMultContext,
     ): Result.Result<Nat8, Text> {
         if(signature.size() != 64) {
             return #err("Invalid signature");

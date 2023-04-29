@@ -3,7 +3,8 @@ import Blob "mo:base/Blob";
 import Error "mo:base/Error";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import Helper "transactions/Helper";
+import Recover "mo:libsecp256k1/Recover";
+import Ecmult "mo:libsecp256k1/core/ecmult";
 import Transaction "Transaction";
 import Types "Types";
 import Address "Address";
@@ -45,7 +46,7 @@ module {
         principal: Principal,
         publicKey: [Nat8],
         nonce: Nat64,
-        ctx: Helper.Context,
+        ctx: Ecmult.ECMultContext,
         api: EcdsaApi.API
     ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
         switch(getData(address, value)) {

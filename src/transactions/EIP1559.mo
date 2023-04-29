@@ -7,6 +7,7 @@ import Int64 "mo:base/Int64";
 import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
 import Recover "mo:libsecp256k1/Recover";
+import Ecmult "mo:libsecp256k1/core/ecmult";
 import Types "../Types";
 import HU "../utils/HashUtils";
 import AU "../utils/ArrayUtils";
@@ -100,7 +101,7 @@ module EIP1559 {
         tx: Types.Transaction1559,
         signature: [Nat8],
         publicKey: [Nat8],
-        ctx: Recover.Context,
+        ctx: Ecmult.ECMultContext,
     ): Result.Result<Types.Transaction1559, Text> {
         let chain_id = tx.chainId;
 
@@ -141,7 +142,7 @@ module EIP1559 {
         tx: Types.Transaction1559,
         signature: [Nat8],
         publicKey: [Nat8],
-        ctx: Recover.Context,
+        ctx: Ecmult.ECMultContext,
     ): Result.Result<(Types.Transaction1559, [Nat8]), Text> {
         switch(sign(tx, signature, publicKey, ctx)) {
             case (#err(msg)) {
