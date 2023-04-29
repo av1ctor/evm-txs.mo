@@ -1,9 +1,11 @@
 import { describe; it; Suite } = "mo:testing/SuiteSync";
+import Ecmult "mo:libsecp256k1/core/ecmult";
 import Helper "../../src/transactions/Helper";
 import HU "../../src/utils/HashUtils";
 import AU "../../src/utils/ArrayUtils";
+import Consts "../consts/pre_g";
 
-let context = Helper.allocContext();
+let context = Ecmult.ECMultContext(?Ecmult.calcPreGFast(Consts.pre_g));
 
 let s = Suite();
 
