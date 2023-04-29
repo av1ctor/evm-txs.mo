@@ -21,15 +21,15 @@ let packages = [
     { 
       name = "libsecp256k1", 
       repo = "https://github.com/av1ctor/mo-libsecp256k1", 
-      version = "master", 
-      dependencies = ["base", "matchers"]
-    },
-    { 
-      name = "matchers", 
-      repo = "https://github.com/kritzcreek/motoko-matchers", 
-      version = "v1.3.0", 
+      version = "main", 
       dependencies = ["base"]
     },
+    { 
+        name = "testing", 
+        version = "main", 
+        repo = "https://github.com/av1ctor/testing.mo",
+        dependencies = [] : List Text
+    }
 ] : List Package
 
 let overrides = [

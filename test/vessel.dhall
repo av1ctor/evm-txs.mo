@@ -1,4 +1,4 @@
 let mainVessel = ../vessel.dhall
 
-in  mainVessel
-  with dependencies = mainVessel.dependencies # [ "matchers" ]
+in mainVessel
+  with dependencies = mainVessel.dependencies # [ "testing" ]
