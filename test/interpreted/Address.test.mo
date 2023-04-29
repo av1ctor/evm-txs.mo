@@ -24,7 +24,7 @@ await* s.run([
             let response = Address.fromPublicKey(AU.fromText("000000000000000000000000000000000000000000000000000000000000000000"));
             response == expected
         }),
-        it("invalid (empby)", func (): Bool {
+        it("invalid (empty)", func (): Bool {
             let expected = #err("Invalid length of public key");
             let response = Address.fromPublicKey(AU.fromText(""));
             response == expected
@@ -36,6 +36,22 @@ await* s.run([
             let signature = AU.fromText("29edd4e1d65e1b778b464112d2febc6e97bb677aba5034408fd27b49921beca94c4e5b904d58553bcd9c788360e0bd55c513922cf1f33a6386033e886cd4f77f");
             let recovery_id = 0: Nat8;
             let message = AU.fromText("79965df63d7d9364f4bc8ed54ffd1c267042d4db673e129e3c459afbcb73a6f1");
+            let response = Address.recover(signature, recovery_id, message, context);
+            response == expected
+        }),
+        it("invalid signature", func (): Bool {
+            let expected = #err("Invalid signature");
+            let signature = AU.fromText("");
+            let recovery_id = 0: Nat8;
+            let message = AU.fromText("79965df63d7d9364f4bc8ed54ffd1c267042d4db673e129e3c459afbcb73a6f1");
+            let response = Address.recover(signature, recovery_id, message, context);
+            response == expected
+        }),
+        it("invalid message", func (): Bool {
+            let expected = #err("Invalid message");
+            let signature = AU.fromText("29edd4e1d65e1b778b464112d2febc6e97bb677aba5034408fd27b49921beca94c4e5b904d58553bcd9c788360e0bd55c513922cf1f33a6386033e886cd4f77f");
+            let recovery_id = 0: Nat8;
+            let message = AU.fromText("");
             let response = Address.recover(signature, recovery_id, message, context);
             response == expected
         }),
