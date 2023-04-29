@@ -9,7 +9,9 @@ import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
-import Utils "../utils/Utils";
+import HU "../utils/HashUtils";
+import AU "../utils/ArrayUtils";
+import RlpUtils "../utils/RlpUtils";
 
 module {
     public type Context = Recover.Context;
@@ -19,7 +21,7 @@ module {
     public func getRecoveryId(
         message: [Nat8],
         signature: [Nat8],
-        public_key: [Nat8],
+        publicKey: [Nat8],
         context: Context,
     ): Result.Result<Nat8, Text> {
         if(signature.size() != 64) {
@@ -28,7 +30,7 @@ module {
         if(message.size() != 32) {
             return #err("Invalid message");
         };
-        if(public_key.size() != 33) {
+        if(publicKey.size() != 33) {
             return #err("Invalid public key");
         };
 
@@ -56,7 +58,7 @@ module {
             switch(Recover.recover_with_context(
                 message_bytes_32, signature_bytes_64, recovery_id, context)) {
                 case (#ok(key)) {
-                    if(key.serialize_compressed() == public_key) {
+                    if(key.serialize_compressed() == publicKey) {
                         return #ok(Nat8.fromNat(i));
                     };
                 };
@@ -73,11 +75,11 @@ module {
         let stream = Buffer.Buffer<RlpTypes.Input>(accessList.size());
 
         for(list in accessList.vals()) {
-            let address = #Uint8Array(Buffer.fromArray<Nat8>(Utils.textToArray(list.0)));
+            let address = #Uint8Array(Buffer.fromArray<Nat8>(AU.fromText(list.0)));
 
             let storageKeys = Buffer.Buffer<RlpTypes.Input>(list.1.size());
             for(key in list.1.vals()) {
-                storageKeys.add(#Uint8Array(Buffer.fromArray(Utils.textToArray(key))));
+                storageKeys.add(#Uint8Array(Buffer.fromArray(AU.fromText(key))));
             };
 
             stream.add(#List(Buffer.fromArray<RlpTypes.Input>([address, #List(storageKeys)])));
@@ -115,11 +117,11 @@ module {
                             return [];
                         };
                         case (#Nested(buf)) {
-                            let address = Utils.rlpGetAsValue(buf.get(0));
-                            let storageKeys = Utils.rlpGetAsList(buf.get(1));
+                            let address = RlpUtils.getAsValue(buf.get(0));
+                            let storageKeys = RlpUtils.getAsList(buf.get(1));
                             res.add((
-                                Utils.arrayToText(address), 
-                                Array.map<[Nat8], Text>(storageKeys, func k = Utils.arrayToText(k))
+                                AU.toText(address), 
+                                Array.map<[Nat8], Text>(storageKeys, func k = AU.toText(k))
                             ));
                         };
                     };

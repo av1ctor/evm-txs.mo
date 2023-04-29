@@ -8,33 +8,34 @@ import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
 import Recover "mo:libsecp256k1/Recover";
 import Types "../Types";
-import Utils "../utils/Utils";
-import ArrayUtils "../utils/ArrayUtils";
-import TextUtils "../utils/TextUtils";
+import HU "../utils/HashUtils";
+import AU "../utils/ArrayUtils";
+import TU "../utils/TextUtils";
+import RlpUtils "../utils/RlpUtils";
 import Helper "Helper";
 
 module EIP2930 {
     public func from(
         data: [Nat8]
     ): Result.Result<Types.Transaction2930, Text> {
-        switch(Rlp.decode(#Uint8Array(Buffer.fromArray(ArrayUtils.right(data, 1))))) {
+        switch(Rlp.decode(#Uint8Array(Buffer.fromArray(AU.right(data, 1))))) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(dec)) {
                 switch(dec) {
                     case (#Nested(list)) {
-                        let chainId = Utils.rlpGetAsNat64(list.get(0));
-                        let nonce = Utils.rlpGetAsNat64(list.get(1));
-                        let gasPrice = Utils.rlpGetAsNat64(list.get(2));
-                        let gasLimit = Utils.rlpGetAsNat64(list.get(3));
-                        let to = Utils.rlpGetAsText(list.get(4));
-                        let value = Utils.rlpGetAsNat64(list.get(5));
-                        let dataTx = Utils.rlpGetAsText(list.get(6));
+                        let chainId = RlpUtils.getAsNat64(list.get(0));
+                        let nonce = RlpUtils.getAsNat64(list.get(1));
+                        let gasPrice = RlpUtils.getAsNat64(list.get(2));
+                        let gasLimit = RlpUtils.getAsNat64(list.get(3));
+                        let to = RlpUtils.getAsText(list.get(4));
+                        let value = RlpUtils.getAsNat64(list.get(5));
+                        let dataTx = RlpUtils.getAsText(list.get(6));
                         let accessList = Helper.serializeAccessList(list.get(7));
-                        let v = Utils.rlpGetAsText(list.get(8));
-                        let r = Utils.rlpGetAsText(list.get(9));
-                        let s = Utils.rlpGetAsText(list.get(10));
+                        let v = RlpUtils.getAsText(list.get(8));
+                        let r = RlpUtils.getAsText(list.get(9));
+                        let s = RlpUtils.getAsText(list.get(10));
 
                         return #ok({
                             chainId = chainId;
@@ -63,13 +64,13 @@ module EIP2930 {
     ): Result.Result<[Nat8], Text> {
         
         let items: [[Nat8]] = [
-            Utils.nat64ToArray(tx.chainId),
-            Utils.nat64ToArray(tx.nonce),
-            Utils.nat64ToArray(tx.gasPrice),
-            Utils.nat64ToArray(tx.gasLimit),
-            Utils.textToArray(tx.to),
-            Utils.nat64ToArray(tx.value),
-            Utils.textToArray(tx.data),
+            AU.fromNat64(tx.chainId),
+            AU.fromNat64(tx.nonce),
+            AU.fromNat64(tx.gasPrice),
+            AU.fromNat64(tx.gasLimit),
+            AU.fromText(tx.to),
+            AU.fromNat64(tx.value),
+            AU.fromText(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 1);
@@ -86,7 +87,7 @@ module EIP2930 {
             case (#ok(enc)) {
                 let msg = Buffer.fromArray<Nat8>([0x01]);
                 msg.append(enc);
-                let hash = Utils.calcKeccak(Buffer.toArray(msg), 256);
+                let hash = HU.keccak(Buffer.toArray(msg), 256);
                 return #ok(hash);
             };
         };
@@ -100,13 +101,13 @@ module EIP2930 {
     ): Result.Result<Types.Transaction2930, Text> {
         let chain_id = tx.chainId;
 
-        let r_remove_leading_zeros = ArrayUtils.stripLeft(
-            ArrayUtils.left(signature, 31), func(e: Nat8): Bool = e == 0);
-        let s_remove_leading_zeros = ArrayUtils.stripLeft(
-            ArrayUtils.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
+        let r_remove_leading_zeros = AU.stripLeft(
+            AU.left(signature, 31), func(e: Nat8): Bool = e == 0);
+        let s_remove_leading_zeros = AU.stripLeft(
+            AU.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
 
-        let r = Utils.arrayToText(r_remove_leading_zeros);
-        let s = Utils.arrayToText(s_remove_leading_zeros);
+        let r = AU.toText(r_remove_leading_zeros);
+        let s = AU.toText(s_remove_leading_zeros);
 
         switch(getMessageToSign(tx)) {
             case (#err(msg)) {
@@ -160,13 +161,13 @@ module EIP2930 {
         tx: Types.Transaction2930
     ): Bool {
         let r = if(Text.startsWith(tx.r, #text("0x"))) {
-            TextUtils.right(tx.r, 2);
+            TU.right(tx.r, 2);
         } else {
             tx.r;
         };
 
         let s = if(Text.startsWith(tx.s, #text("0x"))) {
-            TextUtils.right(tx.s, 2);
+            TU.right(tx.s, 2);
         } else {
             tx.s;
         };
@@ -181,8 +182,8 @@ module EIP2930 {
             return #err("This is not a signed transaction");
         };
 
-        let r = Buffer.fromArray<Nat8>(Utils.textToArray(tx.r));
-        let s = Buffer.fromArray<Nat8>(Utils.textToArray(tx.s));
+        let r = Buffer.fromArray<Nat8>(AU.fromText(tx.r));
+        let s = Buffer.fromArray<Nat8>(AU.fromText(tx.s));
         let res = Buffer.Buffer<Nat8>(r.size() + s.size());
         res.append(r);
         res.append(s);
@@ -197,7 +198,7 @@ module EIP2930 {
             return #err("This is not a signed transaction");
         };
         
-        let v = Utils.textToArray(tx.v);
+        let v = AU.fromText(tx.v);
 
         return if(v.size() == 0) #ok(0) else #ok(1);
     };
@@ -207,17 +208,17 @@ module EIP2930 {
     ): Result.Result<[Nat8], Text> {
 
         let items: [[Nat8]] = [
-            Utils.nat64ToArray(tx.chainId),
-            Utils.nat64ToArray(tx.nonce),
-            Utils.nat64ToArray(tx.gasPrice),
-            Utils.nat64ToArray(tx.gasLimit),
-            Utils.textToArray(tx.to),
-            Utils.nat64ToArray(tx.value),
-            Utils.textToArray(tx.data),
+            AU.fromNat64(tx.chainId),
+            AU.fromNat64(tx.nonce),
+            AU.fromNat64(tx.gasPrice),
+            AU.fromNat64(tx.gasLimit),
+            AU.fromText(tx.to),
+            AU.fromNat64(tx.value),
+            AU.fromText(tx.data),
             Helper.encodeAccessList(tx.accessList),
-            Utils.textToArray(tx.v),
-            Utils.textToArray(tx.r),
-            Utils.textToArray(tx.s),
+            AU.fromText(tx.v),
+            AU.fromText(tx.r),
+            AU.fromText(tx.s),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());

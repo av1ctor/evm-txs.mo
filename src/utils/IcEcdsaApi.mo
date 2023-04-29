@@ -38,7 +38,7 @@ module {
 
     let ecdsa_canister_actor : EcdsaCanisterActor = actor("aaaaa-aa");
 
-    public func ecdsaPublicKey(
+    public func create(
         keyName : Text, 
         derivationPath : [Blob]
     ) : async* Blob {
@@ -54,7 +54,7 @@ module {
         return res.public_key;
     };
 
-    public func signWithEcdsa(
+    public func sign(
         keyName : Text, 
         derivationPath : [Blob], 
         messageHash : Blob

@@ -8,9 +8,10 @@ import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
 import Recover "mo:libsecp256k1/Recover";
 import Types "../Types";
-import Utils "../utils/Utils";
-import ArrayUtils "../utils/ArrayUtils";
-import TextUtils "../utils/TextUtils";
+import HU "../utils/HashUtils";
+import AU "../utils/ArrayUtils";
+import TU "../utils/TextUtils";
+import RlpUtils "../utils/RlpUtils";
 import Helper "Helper";
 
 module Legacy {
@@ -24,15 +25,15 @@ module Legacy {
             case (#ok(dec)) {
                 switch(dec) {
                     case (#Nested(list)) {
-                        let nonce = Utils.rlpGetAsNat64(list.get(0));
-                        let gasPrice = Utils.rlpGetAsNat64(list.get(1));
-                        let gasLimit = Utils.rlpGetAsNat64(list.get(2));
-                        let to = Utils.rlpGetAsText(list.get(3));
-                        let value = Utils.rlpGetAsNat64(list.get(4));
-                        let dataTx = Utils.rlpGetAsText(list.get(5));
-                        let v = Utils.rlpGetAsText(list.get(6));
-                        let r = Utils.rlpGetAsText(list.get(7));
-                        let s = Utils.rlpGetAsText(list.get(8));
+                        let nonce = RlpUtils.getAsNat64(list.get(0));
+                        let gasPrice = RlpUtils.getAsNat64(list.get(1));
+                        let gasLimit = RlpUtils.getAsNat64(list.get(2));
+                        let to = RlpUtils.getAsText(list.get(3));
+                        let value = RlpUtils.getAsNat64(list.get(4));
+                        let dataTx = RlpUtils.getAsText(list.get(5));
+                        let v = RlpUtils.getAsText(list.get(6));
+                        let r = RlpUtils.getAsText(list.get(7));
+                        let s = RlpUtils.getAsText(list.get(8));
 
                         let chainId = data.1;
 
@@ -62,13 +63,13 @@ module Legacy {
     ): Result.Result<[Nat8], Text> {
         
         let items: [[Nat8]] = [
-            Utils.nat64ToArray(tx.nonce),
-            Utils.nat64ToArray(tx.gasPrice),
-            Utils.nat64ToArray(tx.gasLimit),
-            Utils.textToArray(tx.to),
-            Utils.nat64ToArray(tx.value),
-            Utils.textToArray(tx.data),
-            Utils.nat64ToArray(tx.chainId),
+            AU.fromNat64(tx.nonce),
+            AU.fromNat64(tx.gasPrice),
+            AU.fromNat64(tx.gasLimit),
+            AU.fromText(tx.to),
+            AU.fromNat64(tx.value),
+            AU.fromText(tx.data),
+            AU.fromNat64(tx.chainId),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 2);
@@ -84,7 +85,7 @@ module Legacy {
                 return #err(msg);
             };
             case (#ok(enc)) {
-                let hash = Utils.calcKeccak(Buffer.toArray(enc), 256);
+                let hash = HU.keccak(Buffer.toArray(enc), 256);
                 return #ok(hash);
             };
         };
@@ -98,13 +99,13 @@ module Legacy {
     ): Result.Result<Types.TransactionLegacy, Text> {
         let chain_id = tx.chainId;
 
-        let r_remove_leading_zeros = ArrayUtils.stripLeft(
-            ArrayUtils.left(signature, 31), func(e: Nat8): Bool = e == 0);
-        let s_remove_leading_zeros = ArrayUtils.stripLeft(
-            ArrayUtils.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
+        let r_remove_leading_zeros = AU.stripLeft(
+            AU.left(signature, 31), func(e: Nat8): Bool = e == 0);
+        let s_remove_leading_zeros = AU.stripLeft(
+            AU.right<Nat8>(signature, 32), func(e: Nat8): Bool = e == 0);
 
-        let r = Utils.arrayToText(r_remove_leading_zeros);
-        let s = Utils.arrayToText(s_remove_leading_zeros);
+        let r = AU.toText(r_remove_leading_zeros);
+        let s = AU.toText(s_remove_leading_zeros);
 
         switch(getMessageToSign(tx)) {
             case (#err(msg)) {
@@ -117,7 +118,7 @@ module Legacy {
                     };
                     case (#ok(recovery_id)) {
                         let v_number = chain_id * 2 + 35 + Nat64.fromNat(Nat8.toNat(recovery_id));
-                        let v = Utils.arrayToText(Utils.nat64ToArray(v_number));
+                        let v = AU.toText(AU.fromNat64(v_number));
 
                         return #ok({
                             tx
@@ -159,13 +160,13 @@ module Legacy {
         tx: Types.TransactionLegacy
     ): Bool {
         let r = if(Text.startsWith(tx.r, #text("0x"))) {
-            TextUtils.right(tx.r, 2);
+            TU.right(tx.r, 2);
         } else {
             tx.r;
         };
 
         let s = if(Text.startsWith(tx.s, #text("0x"))) {
-            TextUtils.right(tx.s, 2);
+            TU.right(tx.s, 2);
         } else {
             tx.s;
         };
@@ -180,8 +181,8 @@ module Legacy {
             return #err("This is not a signed transaction");
         };
 
-        let r = Buffer.fromArray<Nat8>(Utils.textToArray(tx.r));
-        let s = Buffer.fromArray<Nat8>(Utils.textToArray(tx.s));
+        let r = Buffer.fromArray<Nat8>(AU.fromText(tx.r));
+        let s = Buffer.fromArray<Nat8>(AU.fromText(tx.s));
         let res = Buffer.Buffer<Nat8>(r.size() + s.size());
         res.append(r);
         res.append(s);
@@ -197,7 +198,7 @@ module Legacy {
         };
         
         let chain_id = tx.chainId;
-        let v = Utils.textToArray(tx.v);
+        let v = AU.fromText(tx.v);
 
         let recovery_id = -1 * Int64.fromNat64(((chain_id * 2) + 35 - Nat64.fromNat(Nat8.toNat(v[0]))));
         return #ok(Nat8.fromNat(Nat64.toNat(Int64.toNat64(recovery_id))));
@@ -208,15 +209,15 @@ module Legacy {
     ): Result.Result<[Nat8], Text> {
 
         let items: [[Nat8]] = [
-            Utils.nat64ToArray(tx.nonce),
-            Utils.nat64ToArray(tx.gasPrice),
-            Utils.nat64ToArray(tx.gasLimit),
-            Utils.textToArray(tx.to),
-            Utils.nat64ToArray(tx.value),
-            Utils.textToArray(tx.data),
-            Utils.textToArray(tx.v),
-            Utils.textToArray(tx.r),
-            Utils.textToArray(tx.s)
+            AU.fromNat64(tx.nonce),
+            AU.fromNat64(tx.gasPrice),
+            AU.fromNat64(tx.gasLimit),
+            AU.fromText(tx.to),
+            AU.fromNat64(tx.value),
+            AU.fromText(tx.data),
+            AU.fromText(tx.v),
+            AU.fromText(tx.r),
+            AU.fromText(tx.s)
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());

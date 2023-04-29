@@ -1,12 +1,16 @@
+import Blob "mo:base/Blob";
+import Error "mo:base/Error";
+import Principal "mo:base/Principal";
 import Result "mo:base/Result";
-import Types "../Types";
-import Eip2930 "EIP2930";
-import Legacy "Legacy";
-import Eip1559 "EIP1559";
-import Recover "mo:libsecp256k1/Recover";
+import Types "Types";
+import Eip2930 "transactions/EIP2930";
+import Legacy "transactions/Legacy";
+import Eip1559 "transactions/EIP1559";
+import Helper "transactions/Helper";
+import EcdsaApi "interfaces/EcdsaApi";
 
 module {
-    public func getTransactionType(
+    public func getType(
         rawTx: [Nat8]
     ): Result.Result<Types.TransactionType, Text> {
         if(rawTx[0] >= 0xc0) {
@@ -23,11 +27,11 @@ module {
         };
     };
 
-    public func getTransaction(
+    public func getBoxed(
         rawTx: [Nat8],
         chainId: Nat64
     ): Result.Result<Types.TransactionType, Text> {
-        switch(getTransactionType(rawTx)) {
+        switch(getType(rawTx)) {
             case (#ok(#Legacy(_))) {
                 switch(Legacy.from(rawTx, chainId)) {
                     case (#err(msg)) {
@@ -105,7 +109,7 @@ module {
         tx: Types.TransactionType,
         signature: [Nat8],
         publicKey: [Nat8],
-        ctx: Recover.Context
+        ctx: Helper.Context
     ): Result.Result<(Types.TransactionType, [Nat8]), Text> {
         switch(tx) {
             case (#Legacy(tx)) {
@@ -155,6 +159,43 @@ module {
                             case (#ok(res)) {
                                 return #ok((#EIP1559(?res.0), res.1));
                             };
+                        };
+                    };
+                };
+            };
+        };
+    };
+
+    public func signWithPrincipal(
+        rawTx: [Nat8],
+        chainId: Nat64,
+        keyName: Text,
+        principal: Principal,
+        publicKey: [Nat8],
+        ctx: Helper.Context,
+        api: EcdsaApi.API
+    ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
+        let caller = Principal.toBlob(principal);
+
+        switch(getBoxed(rawTx, chainId)) {
+            case (#err(msg)) {
+                return #err(msg);
+            };
+            case (#ok(tx)) {
+                switch(getMessageToSign(tx)) {
+                    case (#err(msg)) {
+                        return #err(msg);
+                    };
+                    case (#ok(msg)) {
+                        try {
+                            assert(msg.size() == 32);
+                            let signature = await* api.sign(
+                                keyName, [caller], Blob.fromArray(msg));
+
+                            return sign(tx, Blob.toArray(signature), publicKey, ctx);
+                        }
+                        catch(e: Error.Error) {
+                            return #err("sign_with_ecdsa failed: " # Error.message(e));
                         };
                     };
                 };
