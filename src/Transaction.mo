@@ -2,7 +2,6 @@ import Blob "mo:base/Blob";
 import Error "mo:base/Error";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
-import Recover "mo:libsecp256k1/Recover";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Types "Types";
 import Eip2930 "transactions/EIP2930";

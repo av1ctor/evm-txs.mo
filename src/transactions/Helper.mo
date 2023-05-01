@@ -1,7 +1,7 @@
 import RecoveryId "mo:libsecp256k1/RecoveryId";
 import Signature "mo:libsecp256k1/Signature";
 import Message "mo:libsecp256k1/Message";
-import Recover "mo:libsecp256k1/Recover";
+import Ecdsa "mo:libsecp256k1/Ecdsa";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
@@ -52,7 +52,7 @@ module {
 
             let message_bytes_32 = Message.parse(message);
 
-            switch(Recover.recover_with_context(
+            switch(Ecdsa.recover_with_context(
                 message_bytes_32, signature_bytes_64, recovery_id, context)) {
                 case (#ok(key)) {
                     if(key.serialize_compressed() == publicKey) {

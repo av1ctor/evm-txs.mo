@@ -1,7 +1,6 @@
 import Error "mo:base/Error";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import Recover "mo:libsecp256k1/Recover";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Transaction "Transaction";
 import Types "Types";
@@ -42,7 +41,7 @@ module {
             };
             case (#ok(rawTx)) {
                 return await* Transaction.signWithPrincipal(
-                    rawTx, chainId, keyName, principal, publicKey, ctx, api);
+                    rawTx, chainId, keyName, principal, publicKey, context, api);
             };
         };
     };

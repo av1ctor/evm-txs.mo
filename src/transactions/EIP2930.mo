@@ -6,7 +6,6 @@ import Text "mo:base/Text";
 import Int64 "mo:base/Int64";
 import Rlp "mo:rlp";
 import RlpTypes "mo:rlp/types";
-import Recover "mo:libsecp256k1/Recover";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Types "../Types";
 import HU "../utils/HashUtils";

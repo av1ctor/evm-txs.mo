@@ -1,4 +1,4 @@
-import { describe; it; Suite } = "mo:testing/Suite";
+import { describe; it; its; Suite } = "mo:testing/Suite";
 import Helper "../../src/transactions/Helper";
 import HU "../../src/utils/HashUtils";
 import AU "../../src/utils/ArrayUtils";

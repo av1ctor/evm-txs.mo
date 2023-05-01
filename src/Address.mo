@@ -6,7 +6,7 @@ import PublicKey "mo:libsecp256k1/PublicKey";
 import Signature "mo:libsecp256k1/Signature";
 import Message "mo:libsecp256k1/Message";
 import RecoveryId "mo:libsecp256k1/RecoveryId";
-import Recover "mo:libsecp256k1/Recover";
+import Ecdsa "mo:libsecp256k1/Ecdsa";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Helper "transactions/Helper";
 import TU "utils/TextUtils";
@@ -69,7 +69,7 @@ module {
                 switch(RecoveryId.parse(recoveryId)) {
                     case (#ok(recoveryIdParsed)) {
                         let messageParsed = Message.parse(message);
-                        switch(Recover.recover_with_context(
+                        switch(Ecdsa.recover_with_context(
                             messageParsed, signatureParsed, recoveryIdParsed, context)) {
                             case (#ok(publicKey)) {
                                 let address = fromPublicKey(publicKey.serialize_compressed());
