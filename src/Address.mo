@@ -19,12 +19,19 @@ module {
         keyName: Text,
         principal: Principal,
         api: EcdsaApi.API
-    ): async* Result.Result<Text, Text> {
+    ): async* Result.Result<(Text, [Nat8]), Text> {
         let caller = Principal.toBlob(principal);
 
         try {
-            let publicKey = await* api.create(keyName, [caller]);
-            return fromPublicKey(Blob.toArray(publicKey));
+            let publicKey = Blob.toArray(await* api.create(keyName, [caller]));
+            switch(fromPublicKey(publicKey)) {
+                case (#err(msg)) {
+                    return #err(msg);
+                };
+                case (#ok(address)) {
+                    return #ok((address, publicKey));
+                };
+            };
         }
         catch(e: Error.Error) {
             return #err("ecdsa_public_key failed: " # Error.message(e));

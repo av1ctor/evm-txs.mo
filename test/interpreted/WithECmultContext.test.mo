@@ -10,6 +10,7 @@ import IcEcdsaApi "../mocks/IcEcdsaApi";
 import Random "../mocks/Random";
 import Types "../../src/Types";
 import Transaction "../../src/Transaction";
+import Debug "mo:base/Debug";
 
 let testContext = TestContext.Context();
 let icEcdsaApi = IcEcdsaApi.IcEcdsaApiMock(testContext.ecGenCtx, Random.RandomMock());
@@ -21,8 +22,8 @@ await* s.run([
         its("valid", func (): async* Bool {
             let principal_id = Principal.fromText("aaaaa-aa");
             switch(await* Address.create("", principal_id, icEcdsaApi)) {
-                case (#ok(address)) {
-                    address.size() == 42
+                case (#ok(res)) {
+                    res.0.size() == 42
                 };
                 case _ {
                     false
@@ -52,43 +53,45 @@ await* s.run([
                 s = "0x00";
             };
             
-            assert(Legacy.isSigned(tx) == false);
+            if(not (Legacy.isSigned(tx) == false)) {
+                Debug.print("Legacy.isSigned 1");
+                return false;
+            };
 
-            assert(Legacy.getSignature(tx) == expected_get_signature_before);
-            assert(Legacy.getRecoveryId(tx) == expected_get_recovery_id_before);
+            if(not (Legacy.getSignature(tx) == expected_get_signature_before)) {
+                Debug.print("Legacy.getSignature 1");
+                return false;
+            };
+
+            if(not (Legacy.getRecoveryId(tx) == expected_get_recovery_id_before)) {
+                Debug.print("Legacy.getRecoveryId 1");
+                return false;
+            };
 
             let text = "aaaaa-aa";
             let principal_id = Principal.fromText(text);
 
-            let publicKey = switch(await* Address.create("", principal_id, icEcdsaApi)) {
-                case (#ok(address)) {
-                    AU.fromText(address)
+            let (res_create, publicKey) = switch(await* Address.create("", principal_id, icEcdsaApi)) {
+                case (#ok(res)) {
+                    (AU.fromText(res.0), res.1)
                 };
-                case _ {
-                    assert(false);
+                case (#err(msg)) {
+                    Debug.print("Address.create: " # msg);
                     return false;
                 };
             };
 
-            let res_create = switch(await* Address.create("", principal_id, icEcdsaApi)) {
-                case (#err(_)) {
-                    assert(false);
-                    return false;
-                };
-                case (#ok(res)) {
-                    res;
-                };
-            };
             switch(Legacy.serialize(tx)) {
-                case (#err(_)) {
+                case (#err(msg)) {
+                    Debug.print("Legacy.serialize: " # msg);
                     return false;
                 };
                 case (#ok(raw_tx)) {
                     let chain_id: Nat64 = 1;
                     switch(await* Transaction.signWithPrincipal(
                         raw_tx, chain_id, "", principal_id, publicKey, testContext.ecCtx, icEcdsaApi)) {
-                        case (#err(_)) {
-                            assert(false);
+                        case (#err(msg)) {
+                            Debug.print("Transaction.signWithPrincipal: " # msg);
                             return false;
                         };
                         case (#ok(res_sign_)) {
@@ -99,56 +102,69 @@ await* s.run([
                                             ser;
                                         };
                                         case _ {
-                                            assert(false);
+                                            Debug.print("Transaction.serialize");
                                             return false;
                                         };
                                     };
                                 };
                                 case _ {
-                                    assert(false);
+                                    Debug.print("Not legacy");
                                     return false;
                                 };
                             };
 
                             switch(Legacy.from(res_sign, chain_id)) {
                                 case (#err(_)) {
+                                    Debug.print("Legacy.from");
                                     return false;
                                 };
                                 case (#ok(tx_signed)) {
-                                    assert(Legacy.isSigned(tx_signed) == true);
+                                    if(not (Legacy.isSigned(tx_signed) == true)) {
+                                        Debug.print("Legacy.isSigned 2");
+                                        return false;
+                                    };
 
                                     switch(Legacy.getSignature(tx_signed)) {
                                         case (#err(_)) {
-                                            assert(false);
+                                            Debug.print("Legacy.getSignature");
                                             return false;
                                         };
                                         case (#ok(signature)) {
-                                            assert(AU.toText(signature) == expected_get_signature_after);
+                                            if(not (AU.toText(signature) == expected_get_signature_after)) {
+                                                Debug.print("signature != expected_get_signature_after");
+                                                return false;
+                                            };
 
                                             switch(Legacy.getMessageToSign(tx_signed)) {
                                                 case (#err(_)) {
-                                                    assert(false);
+                                                    Debug.print("Legacy.getMessageToSign");
                                                     return false;
                                                 };
                                                 case (#ok(msg)) {
-                                                    assert(AU.toText(msg) == expected_get_message_to_sign_after);
+                                                    if(not (AU.toText(msg) == expected_get_message_to_sign_after)) {
+                                                        Debug.print("msg != expected_get_message_to_sign_after");
+                                                        return false;
+                                                    };
 
                                                     switch(Legacy.getRecoveryId(tx_signed)) {
                                                         case (#err(_)) {
-                                                            assert(false);
+                                                            Debug.print("Legacy.getRecoveryId");
                                                             return false;
                                                         };
                                                         case (#ok(recovery_id)) {
-                                                            assert(recovery_id == expected_get_recovery_id_after);
+                                                            if(not (recovery_id == expected_get_recovery_id_after)) {
+                                                                Debug.print("recovery_id != expected_get_recovery_id_after");
+                                                                return false;
+                                                            };
 
                                                             switch(Address.recover(signature, recovery_id, msg, testContext.ecCtx)) {
                                                                 case (#err(_)) {
-                                                                    assert(false);
+                                                                    Debug.print("Address.recover");
                                                                     return false;
                                                                 };
                                                                 case (#ok(address)) {
                                                                     assert(address == expected_address);
-                                                                    res_create == address
+                                                                    res_create == AU.fromText(address)
                                                                 };
                                                             };
                                                         };

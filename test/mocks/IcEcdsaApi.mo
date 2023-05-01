@@ -40,7 +40,7 @@ module {
         ): async* Blob {
             switch(SecretKey.parse(AU.fromText(privateKey))) {
                 case (#err(msg)) {
-                    return Blob.fromArray([]);
+                    throw Error.reject(debug_show msg);
                 };
                 case (#ok(privateKey)) {
                     let message_parsed = Message.parse(Blob.toArray(messageHash));
