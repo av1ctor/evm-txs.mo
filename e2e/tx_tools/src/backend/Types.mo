@@ -10,9 +10,4 @@ module {
     public type DeployEVMContractResponse = {
         tx: [Nat8];
     };
-    
-    public type UserResponse = {
-        address: Text;
-        //transactions: TransactionChainData;
-    };
 }
