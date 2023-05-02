@@ -4,7 +4,7 @@ module {
     public type Network = {
         #Mainnet;
         #Testnet;
-        #Regtest;
+        #Localhost;
     };
     
     public type ECDSAPublicKeyReply = {

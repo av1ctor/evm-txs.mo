@@ -14,7 +14,8 @@ EVM transaction creation, encoding, and decoding in pure Motoko.
 - The chain id is user-defined
 - Can be set up to work with vessel or MOPS
 
-## How to develop
+## Examples
+See e2e/tx_tools for a complete example
 
 ## Todo
 

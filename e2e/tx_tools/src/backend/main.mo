@@ -14,7 +14,7 @@ shared({caller = owner}) actor class TxTools(
     network: IcEcdsaApi.Network
 ) = this {
     let keyName: Text = switch network {
-        case (#Regtest) "dfx_test_key";
+        case (#Localhost) "dfx_test_key";
         case _ "test_key_1"
     };
 
