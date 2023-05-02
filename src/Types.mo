@@ -1,3 +1,5 @@
+import Ecmult "mo:libsecp256k1/core/ecmult";
+
 module {
     public type TransactionType = {
         #Legacy: ?TransactionLegacy;
@@ -31,4 +33,7 @@ module {
         maxFeePerGas: Nat64;
         accessList: [(Text, [Text])];
     };
+
+    public type ECMultContext = Ecmult.ECMultContext;
+    public type ECMultGenContext = Ecmult.ECMultGenContext;
 }
