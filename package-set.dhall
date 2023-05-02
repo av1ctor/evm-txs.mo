@@ -20,7 +20,7 @@ let packages = [
     },
     { 
       name = "libsecp256k1", 
-      repo = "https://github.com/av1ctor/mo-libsecp256k1", 
+      repo = "https://github.com/av1ctor/libsecp256k1.mo", 
       version = "main", 
       dependencies = ["base"]
     },
