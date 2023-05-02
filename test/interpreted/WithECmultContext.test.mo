@@ -34,7 +34,7 @@ await* s.run([
     describe("Transaction.Legacy", [
         its("valid", func(): async* Bool {
             let expected_get_signature_before = #err("This is not a signed transaction");
-            let expected_get_signature_after ="c9e2682ec5084986365523c4268c5956c064c1ee85dc208364cb71e93edabab612ffab0eaed3e34865b225e9f349945599f8641cd806dc43029e0f92fdca23cb";
+            let expected_get_signature_after ="6d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e232a67dc633abe18faaa655f07724d662f14bc160943ac3b9538be5b23aac4670";
             let expected_get_recovery_id_before = #err("This is not a signed transaction");
             let expected_get_recovery_id_after = 0: Nat8;
             let expected_get_message_to_sign_after = "eb86127620fbc047c6b6c2fcedea010143538e452dc7cb67a7fb1f8a00abdbd9";
@@ -207,5 +207,4 @@ await* s.run([
             response == expected
         }),
     ]),
-
 ]);
