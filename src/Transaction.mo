@@ -1,6 +1,5 @@
 import Blob "mo:base/Blob";
 import Error "mo:base/Error";
-import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Types "Types";
@@ -166,7 +165,7 @@ module {
         };
     };
 
-    public func signWithPrincipal(
+    public func signRawTx(
         rawTx: [Nat8],
         chainId: Nat64,
         keyName: Text,

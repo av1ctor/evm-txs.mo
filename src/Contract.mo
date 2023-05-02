@@ -1,6 +1,5 @@
 import Error "mo:base/Error";
 import Result "mo:base/Result";
-import Principal "mo:base/Principal";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Transaction "Transaction";
 import Types "Types";
@@ -8,14 +7,14 @@ import AU "utils/ArrayUtils";
 import EcdsaApi "interfaces/EcdsaApi";
 
 module {
-    public func deploy(
+    public func signDeployment(
         bytecode: [Nat8],
         maxPriorityFeePerGas: Nat64,
         gasLimit: Nat64,
         maxFeePerGas: Nat64,
         chainId: Nat64,
         keyName: Text,
-        principal: Principal,
+        derivationPath: [Blob],
         publicKey: [Nat8],
         nonce: Nat64,
         context: Ecmult.ECMultContext,
@@ -40,8 +39,8 @@ module {
                 return #err(msg);
             };
             case (#ok(rawTx)) {
-                return await* Transaction.signWithPrincipal(
-                    rawTx, chainId, keyName, principal, publicKey, context, api);
+                return await* Transaction.signRawTx(
+                    rawTx, chainId, keyName, derivationPath, publicKey, context, api);
             };
         };
     };

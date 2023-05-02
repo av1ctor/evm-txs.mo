@@ -22,8 +22,8 @@ let s = Suite();
 await* s.run([
     describe("Address.create", [
         its("valid", func (): async* Bool {
-            let principal_id = Principal.fromText("aaaaa-aa");
-            switch(await* Address.create("", principal_id, icEcdsaApi)) {
+            let principal_id = Principal.toBlob(Principal.fromText("aaaaa-aa"));
+            switch(await* Address.create("", [principal_id], icEcdsaApi)) {
                 case (#ok(res)) {
                     res.0.size() == 42
                 };
@@ -71,9 +71,9 @@ await* s.run([
             };
 
             let text = "aaaaa-aa";
-            let principal_id = Principal.fromText(text);
+            let principal_id = Principal.toBlob(Principal.fromText("aaaaa-aa"));
 
-            let (res_create, publicKey) = switch(await* Address.create("", principal_id, icEcdsaApi)) {
+            let (res_create, publicKey) = switch(await* Address.create("", [principal_id], icEcdsaApi)) {
                 case (#ok(res)) {
                     (AU.fromText(res.0), res.1)
                 };
@@ -90,10 +90,10 @@ await* s.run([
                 };
                 case (#ok(raw_tx)) {
                     let chain_id: Nat64 = 1;
-                    switch(await* Transaction.signWithPrincipal(
-                        raw_tx, chain_id, "", principal_id, publicKey, testContext.ecCtx, icEcdsaApi)) {
+                    switch(await* Transaction.signRawTx(
+                        raw_tx, chain_id, "", [principal_id], publicKey, testContext.ecCtx, icEcdsaApi)) {
                         case (#err(msg)) {
-                            Debug.print("Transaction.signWithPrincipal: " # msg);
+                            Debug.print("Transaction.signRawTx: " # msg);
                             return false;
                         };
                         case (#ok(res_sign_)) {
@@ -222,9 +222,9 @@ await* s.run([
             };
 
             let text = "aaaaa-aa";
-            let principal_id = Principal.fromText(text);
+            let principal_id = Principal.toBlob(Principal.fromText("aaaaa-aa"));
 
-            let (res_create, publicKey) = switch(await* Address.create("", principal_id, icEcdsaApi)) {
+            let (res_create, publicKey) = switch(await* Address.create("", [principal_id], icEcdsaApi)) {
                 case (#ok(res)) {
                     (AU.fromText(res.0), res.1)
                 };
@@ -241,10 +241,10 @@ await* s.run([
                 };
                 case (#ok(raw_tx)) {
                     let chain_id: Nat64 = 1;
-                    switch(await* Transaction.signWithPrincipal(
-                        raw_tx, chain_id, "", principal_id, publicKey, testContext.ecCtx, icEcdsaApi)) {
+                    switch(await* Transaction.signRawTx(
+                        raw_tx, chain_id, "", [principal_id], publicKey, testContext.ecCtx, icEcdsaApi)) {
                         case (#err(msg)) {
-                            Debug.print("Transaction.signWithPrincipal: " # msg);
+                            Debug.print("Transaction.signRawTx: " # msg);
                             return false;
                         };
                         case (#ok(res_sign_)) {
@@ -374,9 +374,9 @@ await* s.run([
             };
 
             let text = "aaaaa-aa";
-            let principal_id = Principal.fromText(text);
+            let principal_id = Principal.toBlob(Principal.fromText("aaaaa-aa"));
 
-            let (res_create, publicKey) = switch(await* Address.create("", principal_id, icEcdsaApi)) {
+            let (res_create, publicKey) = switch(await* Address.create("", [principal_id], icEcdsaApi)) {
                 case (#ok(res)) {
                     (AU.fromText(res.0), res.1)
                 };
@@ -393,10 +393,10 @@ await* s.run([
                 };
                 case (#ok(raw_tx)) {
                     let chain_id: Nat64 = 1;
-                    switch(await* Transaction.signWithPrincipal(
-                        raw_tx, chain_id, "", principal_id, publicKey, testContext.ecCtx, icEcdsaApi)) {
+                    switch(await* Transaction.signRawTx(
+                        raw_tx, chain_id, "", [principal_id], publicKey, testContext.ecCtx, icEcdsaApi)) {
                         case (#err(msg)) {
-                            Debug.print("Transaction.signWithPrincipal: " # msg);
+                            Debug.print("Transaction.signRawTx: " # msg);
                             return false;
                         };
                         case (#ok(res_sign_)) {

@@ -55,15 +55,15 @@ await* s.run([
             response == expected
         }),
     ]),
-    describe("getTransferData", [
+    describe("getTransferERC20Data", [
         it("valid", func (): Bool {
             let expected = #ok("a9059cbb000000000000000000000000907dc4d0be5d691970cae886fcab34ed65a2cd660000000000000000000000000000000000000000000000000000000000000001");
-            let response = Transfer.getData("0x907dc4d0be5d691970cae886fcab34ed65a2cd66", 1);
+            let response = Transfer.getTransferERC20Data("0x907dc4d0be5d691970cae886fcab34ed65a2cd66", 1);
             response == expected
         }),
         it("invalid", func (): Bool {
             let expected = #err("Invalid address");
-            let response = Transfer.getData("0x00", 1);
+            let response = Transfer.getTransferERC20Data("0x00", 1);
             response == expected
         }),
     ]),

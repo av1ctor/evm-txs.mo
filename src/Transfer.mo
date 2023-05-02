@@ -2,7 +2,6 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Error "mo:base/Error";
 import Result "mo:base/Result";
-import Principal "mo:base/Principal";
 import Ecmult "mo:libsecp256k1/core/ecmult";
 import Transaction "Transaction";
 import Types "Types";
@@ -13,7 +12,7 @@ import TU "utils/TextUtils";
 import EcdsaApi "interfaces/EcdsaApi";
 
 module {
-    public func getData(
+    public func getTransferERC20Data(
         address: Text, 
         amount: Nat64
     ): Result.Result<Text, Text> {
@@ -33,7 +32,7 @@ module {
         return #ok(method_id # address_64 # amount_64);
     };
 
-    public func transferERC20(
+    public func signTransferERC20(
         address: Text,
         value: Nat64,
         contractAddress: Text,
@@ -42,13 +41,13 @@ module {
         maxFeePerGas: Nat64,
         chainId: Nat64,
         keyName: Text,
-        principal: Principal,
+        derivationPath: [Blob],
         publicKey: [Nat8],
         nonce: Nat64,
         ctx: Ecmult.ECMultContext,
         api: EcdsaApi.API
     ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
-        switch(getData(address, value)) {
+        switch(getTransferERC20Data(address, value)) {
             case (#err(msg)) {
                 return #err(msg);
             };
@@ -72,8 +71,8 @@ module {
                         return #err(msg);
                     };
                     case (#ok(rawTx)) {
-                        return await* Transaction.signWithPrincipal(
-                            rawTx, chainId, keyName, principal, publicKey, ctx, api);
+                        return await* Transaction.signRawTx(
+                            rawTx, chainId, keyName, derivationPath, publicKey, ctx, api);
                     };
                 };
             };

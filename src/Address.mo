@@ -1,5 +1,4 @@
 import Blob "mo:base/Blob";
-import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Error "mo:base/Error";
 import PublicKey "mo:libsecp256k1/PublicKey";
