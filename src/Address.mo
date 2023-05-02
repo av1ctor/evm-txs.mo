@@ -17,13 +17,11 @@ import EcdsaApi "interfaces/EcdsaApi";
 module {
     public func create(
         keyName: Text,
-        principal: Principal,
+        derivationPath: [Blob],
         api: EcdsaApi.API
     ): async* Result.Result<(Text, [Nat8]), Text> {
-        let caller = Principal.toBlob(principal);
-
         try {
-            let publicKey = Blob.toArray(await* api.create(keyName, [caller]));
+            let publicKey = Blob.toArray(await* api.create(keyName, derivationPath));
             switch(fromPublicKey(publicKey)) {
                 case (#err(msg)) {
                     return #err(msg);
@@ -34,7 +32,7 @@ module {
             };
         }
         catch(e: Error.Error) {
-            return #err("ecdsa_public_key failed: " # Error.message(e));
+            return #err("api.create failed: " # Error.message(e));
         };
     };
    

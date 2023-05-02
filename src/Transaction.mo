@@ -170,12 +170,11 @@ module {
         rawTx: [Nat8],
         chainId: Nat64,
         keyName: Text,
-        principal: Principal,
+        derivationPath: [Blob],
         publicKey: [Nat8],
         ctx: Ecmult.ECMultContext,
         api: EcdsaApi.API
     ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
-        let caller = Principal.toBlob(principal);
 
         switch(getBoxed(rawTx, chainId)) {
             case (#err(msg)) {
@@ -190,12 +189,12 @@ module {
                         try {
                             assert(msg.size() == 32);
                             let signature = await* api.sign(
-                                keyName, [caller], Blob.fromArray(msg));
+                                keyName, derivationPath, Blob.fromArray(msg));
 
                             return sign(tx, Blob.toArray(signature), publicKey, ctx);
                         }
                         catch(e: Error.Error) {
-                            return #err("sign_with_ecdsa failed: " # Error.message(e));
+                            return #err("api.sign failed: " # Error.message(e));
                         };
                     };
                 };
