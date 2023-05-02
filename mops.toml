@@ -1,0 +1,11 @@
+[package]
+name = "evm-txs"
+version = "0.1.0"
+description = "Motoko EVM transaction creation, encoding, and decoding"
+repository = "https://github.com/av1ctor/evm-txs.mo"
+
+[dependencies]
+base = "0.7.6"
+rlp = "https://github.com/relaxed04/rlp-motoko#master"
+libsecp256k1 = "https://github.com/av1ctor/libsecp256k1.mo#main"
+sha3 = "https://github.com/hanbu97/motoko-sha3#v0.1.1"

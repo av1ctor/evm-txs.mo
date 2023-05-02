@@ -1,4 +1,5 @@
 .vessel
+.mops
 *.wasm
 docs/
 obj/
