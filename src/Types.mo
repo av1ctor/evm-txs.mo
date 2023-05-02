@@ -1,4 +1,5 @@
 import Ecmult "mo:libsecp256k1/core/ecmult";
+import Group "mo:libsecp256k1/core/group";
 
 module {
     public type TransactionType = {
@@ -34,6 +35,9 @@ module {
         accessList: [(Text, [Text])];
     };
 
+    // alias
     public type ECMultContext = Ecmult.ECMultContext;
     public type ECMultGenContext = Ecmult.ECMultGenContext;
+    public func loadPreG(pre_g: Blob): [Group.AffineStorage] = Ecmult.loadPreG(pre_g);
+    public func loadPrec(prec: Blob): [[Group.AffineStorage]] = Ecmult.loadPrec(prec);
 }
