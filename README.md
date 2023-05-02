@@ -18,7 +18,7 @@ EVM transaction creation, encoding, and decoding in pure Motoko.
 
 ## Todo
 
-### Licensing
+## Licensing
 Distributed under the terms of the Apache License (Version 2.0).
 
 See LICENSE for details.
