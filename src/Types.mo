@@ -10,7 +10,7 @@ module {
         nonce: Nat64;
         gasLimit: Nat64;
         to: Text;
-        value: Nat64;
+        value: Nat;
         data: Text;
         v: Text;
         r: Text;

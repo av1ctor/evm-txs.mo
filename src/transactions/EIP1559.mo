@@ -31,7 +31,7 @@ module EIP1559 {
                         let maxFeePerGas = RlpUtils.getAsNat64(list.get(3));
                         let gasLimit = RlpUtils.getAsNat64(list.get(4));
                         let to = RlpUtils.getAsText(list.get(5));
-                        let value = RlpUtils.getAsNat64(list.get(6));
+                        let value = RlpUtils.getAsNat256(list.get(6));
                         let dataTx = RlpUtils.getAsText(list.get(7));
                         let accessList = Helper.serializeAccessList(list.get(8));
                         let v = RlpUtils.getAsText(list.get(9));
@@ -72,7 +72,7 @@ module EIP1559 {
             AU.fromNat64(tx.maxFeePerGas),
             AU.fromNat64(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat256(tx.value),
             AU.fromText(tx.data),
         ];
 
@@ -216,7 +216,7 @@ module EIP1559 {
             AU.fromNat64(tx.maxFeePerGas),
             AU.fromNat64(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat256(tx.value),
             AU.fromText(tx.data),
             Helper.encodeAccessList(tx.accessList),
             AU.fromText(tx.v),

@@ -30,7 +30,7 @@ module EIP2930 {
                         let gasPrice = RlpUtils.getAsNat64(list.get(2));
                         let gasLimit = RlpUtils.getAsNat64(list.get(3));
                         let to = RlpUtils.getAsText(list.get(4));
-                        let value = RlpUtils.getAsNat64(list.get(5));
+                        let value = RlpUtils.getAsNat256(list.get(5));
                         let dataTx = RlpUtils.getAsText(list.get(6));
                         let accessList = Helper.serializeAccessList(list.get(7));
                         let v = RlpUtils.getAsText(list.get(8));
@@ -69,7 +69,7 @@ module EIP2930 {
             AU.fromNat64(tx.gasPrice),
             AU.fromNat64(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat256(tx.value),
             AU.fromText(tx.data),
         ];
 
@@ -213,7 +213,7 @@ module EIP2930 {
             AU.fromNat64(tx.gasPrice),
             AU.fromNat64(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat256(tx.value),
             AU.fromText(tx.data),
             Helper.encodeAccessList(tx.accessList),
             AU.fromText(tx.v),

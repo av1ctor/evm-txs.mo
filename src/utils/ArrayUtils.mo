@@ -62,6 +62,22 @@ module {
         return Buffer.toArray(res);
     };
 
+    public func slice<T>(
+        arr: [T],
+        offset: Nat,
+        elms: Nat
+    ): [T] {
+        let res = Buffer.Buffer<T>(elms);
+
+        var i = offset;
+        while(i < offset + elms) {
+            res.add(arr[i]);
+            i += 1;
+        };
+
+        return Buffer.toArray(res);
+    };
+
     public func stripLeft<T>(
         arr: [T],
         strip: (a: T) -> Bool
@@ -97,21 +113,63 @@ module {
         return res;
     };
 
+    public func toNat256(
+        arr: [Nat8]
+    ): Nat {
+        var res: Nat = 0;
+        for(byte in arr.vals()) {
+            res := (res * 256) + Nat8.toNat(byte);
+        };
+
+        return res % (2**256);
+    };
+
     public func fromNat64(
         value: Nat64
     ): [Nat8] {
         let res = Buffer.Buffer<Nat8>(8);
         
         // WebAssembly is little-endian and the evm is big-endian, so a conversion is needed
-        var val = value;
+        var value64 = value;
         var hasLeading = false;
-        while(val > 0) {
-            let byte = (val >> 56) & 0xff;
-            val <<= 8;
-            if(hasLeading or byte != 0) {
+        var bytes = 0;
+        while(bytes < 8 and (value64 > 0 or hasLeading)) {
+            let byte = (value64 >> 56) & 0xff;
+            value64 <<= 8;
+            if(byte > 0 or hasLeading) {
                 res.add(Nat8.fromNat(Nat64.toNat(byte)));
                 hasLeading := true;
             };
+            bytes += 1;
+        };
+
+        return Buffer.toArray(res);
+    };
+
+    public func fromNat256(
+        value: Nat
+    ): [Nat8] {
+        let res = Buffer.Buffer<Nat8>(32);
+        
+        // WebAssembly is little-endian and the evm is big-endian, so a conversion is needed
+        var value256 = value % (2**256);
+        var hasLeading = false;
+        var nibbles = 0;
+        while(nibbles < 4 and (value256 > 0 or hasLeading)) {
+            var value64 = Nat64.fromNat(value256 / (2**192));
+            var bytes = 0;
+            while(bytes < 8 and (value64 > 0 or hasLeading)) {
+                let byte = (value64 >> 56) & 0xff;
+                value64 <<= 8;
+                if(byte > 0 or hasLeading) {
+                    res.add(Nat8.fromNat(Nat64.toNat(byte)));
+                    hasLeading := true;
+                };
+                bytes += 1;
+            };
+
+            value256 := (value256 * (2**64)) % (2**256);
+            nibbles += 1;
         };
 
         return Buffer.toArray(res);

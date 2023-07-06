@@ -22,6 +22,12 @@ module {
         return AU.toNat64(getAsValue(dec));
     };
 
+    public func getAsNat256(
+        dec: RlpTypes.Decoded
+    ): Nat {
+        return AU.toNat256(getAsValue(dec));
+    };
+
     public func getAsText(
         dec: RlpTypes.Decoded
     ): Text {

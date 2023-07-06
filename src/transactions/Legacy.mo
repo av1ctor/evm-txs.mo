@@ -29,7 +29,7 @@ module Legacy {
                         let gasPrice = RlpUtils.getAsNat64(list.get(1));
                         let gasLimit = RlpUtils.getAsNat64(list.get(2));
                         let to = RlpUtils.getAsText(list.get(3));
-                        let value = RlpUtils.getAsNat64(list.get(4));
+                        let value = RlpUtils.getAsNat256(list.get(4));
                         let dataTx = RlpUtils.getAsText(list.get(5));
                         let v = RlpUtils.getAsText(list.get(6));
                         let r = RlpUtils.getAsText(list.get(7));
@@ -67,7 +67,7 @@ module Legacy {
             AU.fromNat64(tx.gasPrice),
             AU.fromNat64(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat256(tx.value),
             AU.fromText(tx.data),
             AU.fromNat64(tx.chainId),
         ];
@@ -213,7 +213,7 @@ module Legacy {
             AU.fromNat64(tx.gasPrice),
             AU.fromNat64(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat256(tx.value),
             AU.fromText(tx.data),
             AU.fromText(tx.v),
             AU.fromText(tx.r),
