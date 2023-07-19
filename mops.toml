@@ -1,6 +1,6 @@
 [package]
 name = "evm-txs"
-version = "0.1.2"
+version = "0.1.3"
 description = "Motoko EVM transaction creation, encoding, and decoding"
 repository = "https://github.com/av1ctor/evm-txs.mo"
 
