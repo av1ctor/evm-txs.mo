@@ -3,3 +3,4 @@
 *.wasm
 docs/
 obj/
+node_modules/
