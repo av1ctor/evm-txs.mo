@@ -1,5 +1,6 @@
 # evm-txs.mo
-EVM transaction creation, encoding, and decoding in pure Motoko.
+EVM transactions creation, encoding, and decoding library in pure Motoko.    
+ICDevs.org bounty #32, see: https://forum.dfinity.org/t/open-icdevs-org-bounty-32-evm-transactions-motoko-8-000/17884
 
 ## References
 - Ported from https://github.com/nikolas-con/ic-evm-sign
