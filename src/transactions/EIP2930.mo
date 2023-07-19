@@ -206,7 +206,7 @@ module EIP2930 {
     public func serialize(
         tx: Types.Transaction2930
     ): Result.Result<[Nat8], Text> {
-
+        //
         let items: [[Nat8]] = [
             AU.fromNat64(tx.chainId),
             AU.fromNat64(tx.nonce),
@@ -215,14 +215,24 @@ module EIP2930 {
             AU.fromText(tx.to),
             AU.fromNat256(tx.value),
             AU.fromText(tx.data),
-            Helper.encodeAccessList(tx.accessList),
-            AU.fromText(tx.v),
-            AU.fromText(tx.r),
-            AU.fromText(tx.s),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());
         for(item in items.vals()) {
+            buf.add(#Uint8Array(Buffer.fromArray(item)));
+        };
+
+        // access list
+        buf.add(Helper.deserializeAccessList(tx.accessList));
+
+        // signature
+        let signItems: [[Nat8]] = [
+            AU.fromText(tx.v),
+            AU.fromText(tx.r),
+            AU.fromText(tx.s)
+        ];
+        
+        for(item in signItems.vals()) {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
 

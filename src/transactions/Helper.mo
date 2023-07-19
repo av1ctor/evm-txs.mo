@@ -133,7 +133,7 @@ module {
         accessList: [Nat8]
     ): [(Text, [Text])] {
         switch(Rlp.decode(#Uint8Array(Buffer.fromArray(accessList)))) {
-            case (#err(msg)) {
+            case (#err(_)) {
                 return [];
             };
             case (#ok(dec)) {

@@ -4,10 +4,12 @@ module {
     };
     
     public type SignTransactionResponse = {
-        sign_tx: [Nat8];
+        tx: [Nat8];
+        tx_text: Text;
     };
     
     public type DeployEVMContractResponse = {
         tx: [Nat8];
+        tx_text: Text;
     };
 }

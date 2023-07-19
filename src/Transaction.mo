@@ -201,6 +201,34 @@ module {
         };
     };
 
+    public func signTx(
+        tx: Types.TransactionType,
+        chainId: Nat64,
+        keyName: Text,
+        derivationPath: [Blob],
+        publicKey: [Nat8],
+        ctx: Ecmult.ECMultContext,
+        api: EcdsaApi.API
+    ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
+        switch(getMessageToSign(tx)) {
+            case (#err(msg)) {
+                    return #err(msg);
+            };
+            case (#ok(msg)) {
+                try {
+                    assert(msg.size() == 32);
+                    let signature = await* api.sign(
+                        keyName, derivationPath, Blob.fromArray(msg));
+
+                    return sign(tx, Blob.toArray(signature), publicKey, ctx);
+                }
+                catch(e: Error.Error) {
+                    return #err("api.sign failed: " # Error.message(e));
+                };
+            };
+        };
+    };
+
     public func serialize(
         tx: Types.TransactionType
     ): Result.Result<[Nat8], Text> {

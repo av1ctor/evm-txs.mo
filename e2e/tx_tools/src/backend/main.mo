@@ -2,6 +2,8 @@ import Address "../../../../src/Address";
 import Contract "../../../../src/Contract";
 import Transaction "../../../../src/Transaction";
 import Context "../../../../src/Context";
+import TxTypes "../../../../src/Types";
+import AU "../../../../src/utils/ArrayUtils";
 
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
@@ -56,7 +58,7 @@ shared({caller = owner}) actor class TxTools(
         };
     };
 
-    public shared(msg) func sign_evm_tx(
+    public shared(msg) func sign_raw_evm_tx(
         hex_raw_tx: [Nat8],
         chain_id: Nat64
     ): async Result.Result<Types.SignTransactionResponse, Text> {
@@ -77,7 +79,36 @@ shared({caller = owner}) actor class TxTools(
             };
             case (#ok(tx)) {
                 return #ok({
-                    sign_tx = tx.1;
+                    tx = tx.1;
+                    tx_text = "0x" # AU.toText(tx.1);
+                });
+            };
+        };
+    };
+
+    public shared(msg) func sign_evm_tx(
+        tx: TxTypes.TransactionType,
+        chain_id: Nat64
+    ): async Result.Result<Types.SignTransactionResponse, Text> {
+        let principalId = msg.caller;
+        let derivationPath = [Principal.toBlob(principalId)];
+
+        let user = switch(users.get(principalId)) {
+            case null return #err("Unknown user");
+            case (?key) key;
+        };
+
+        switch(await* Transaction.signTx(
+            tx, chain_id, 
+            keyName, derivationPath, user.publicKey, 
+            ecCtx, icEcdsaApi)) {
+            case (#err(msg)) {
+                return #err(msg);
+            };
+            case (#ok(tx)) {
+                return #ok({
+                    tx = tx.1;
+                    tx_text = "0x" # AU.toText(tx.1);
                 });
             };
         };
@@ -115,6 +146,7 @@ shared({caller = owner}) actor class TxTools(
 
                 return #ok({
                     tx = res.1;
+                    tx_text = "0x" # AU.toText(res.1);
                 });
             };
         };

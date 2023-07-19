@@ -14,7 +14,7 @@ import EcdsaApi "interfaces/EcdsaApi";
 module {
     public func getTransferERC20Data(
         address: Text, 
-        amount: Nat64
+        amount: Nat
     ): Result.Result<Text, Text> {
         if(address.size() != 42) {
             return #err("Invalid address");
@@ -26,15 +26,15 @@ module {
 
         let address_64 = TU.fill(TU.right(address, 2), '0', 64);
 
-        let amount_hex = AU.toText(AU.fromNat64(amount));
-        let amount_64 = TU.fill(amount_hex, '0', 64);
+        let amount_hex = AU.toText(AU.fromNat256(amount));
+        let amount_256 = TU.fill(amount_hex, '0', 256);
 
-        return #ok(method_id # address_64 # amount_64);
+        return #ok(method_id # address_64 # amount_256);
     };
 
     public func signTransferERC20(
         address: Text,
-        value: Nat64,
+        value: Nat,
         contractAddress: Text,
         maxPriorityFeePerGas: Nat64,
         gasLimit: Nat64,
